@@ -24,6 +24,7 @@ interface HeaderProps {
   unreadAlertCount?: number;
   onToggleAlerts?: () => void;
   caseData?: InvestigationCase;
+  onDirectDashboard?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -34,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
   unreadAlertCount = 0,
   onToggleAlerts,
   caseData,
+  onDirectDashboard,
 }) => {
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
@@ -134,6 +136,16 @@ export const Header: React.FC<HeaderProps> = ({
             <span>SIH INFO</span>
             <Info className="w-3 h-3 text-[#888888]" />
           </button>
+
+          {/* Direct Dashboard button when on landing screen */}
+          {currentScreen === 'landing' && onDirectDashboard && (
+            <button
+              onClick={onDirectDashboard}
+              className="flex items-center space-x-1.5 bg-[#ffffff] hover:bg-[#e5e5e5] text-black px-3 py-1 rounded text-xs font-bold transition cursor-pointer shadow-sm"
+            >
+              <span>Enter Dashboard &rarr;</span>
+            </button>
+          )}
 
           {/* Dashboard Control Buttons */}
           {currentScreen === 'dashboard' && (

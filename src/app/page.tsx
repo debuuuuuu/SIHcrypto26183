@@ -67,14 +67,30 @@ interface NavGroup {
   items: NavItem[];
 }
 
-export default function Home() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('landing');
-  const [activeTab, setActiveTab] = useState<ActiveTab>('graph');
+export default function Home(props: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
+  const initial = props?.searchParams?.screen === 'dashboard' ? 'dashboard' : 'landing';
+  const [currentScreen, setCurrentScreen] = useState<Screen>(initial);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
   const [currentCase, setCurrentCase] = useState<InvestigationCase>(() =>
     hydrateCaseWithNcrp(DEMO_CASE)
   );
   const [alerts, setAlerts] = useState<InvestigationAlert[]>(INITIAL_ALERTS);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+
+  // Check URL query parameters or path on client load
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (
+        searchParams.get('screen') === 'dashboard' ||
+        window.location.pathname.includes('/dashboard')
+      ) {
+        setCurrentScreen('dashboard');
+      }
+    }
+  }, []);
 
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>('suspect');
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
@@ -86,6 +102,11 @@ export default function Home() {
 
   // Unread alerts count
   const unreadAlertCount = alerts.filter((a) => !a.read).length;
+
+  // Direct dashboard entry handler
+  const handleDirectDashboard = () => {
+    setCurrentScreen('dashboard');
+  };
 
   // Handlers for investigation flow
   const handleStartDemo = () => {
@@ -234,6 +255,7 @@ export default function Home() {
         unreadAlertCount={unreadAlertCount}
         onToggleAlerts={() => setIsAlertsOpen(true)}
         caseData={currentCase}
+        onDirectDashboard={handleDirectDashboard}
       />
 
       {/* Screen 1: Landing Start Screen */}
