@@ -26,7 +26,30 @@ interface CaseOverviewViewProps {
   onOpenReport: () => void;
   onSelectWallet: (walletId: string) => void;
   caseData?: InvestigationCase;
+  caseData?: InvestigationCase;
 }
+
+const NumberTicker = ({ value, duration = 1500, suffix = '', prefix = '', isDecimal = false }: { value: number, duration?: number, suffix?: string, prefix?: string, isDecimal?: boolean }) => {
+  const [count, useStateCount] = useState(0);
+  
+  React.useEffect(() => {
+    let startTimestamp: number | null = null;
+    let animationFrame: number;
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      useStateCount(value * ease);
+      if (progress < 1) {
+        animationFrame = window.requestAnimationFrame(step);
+      }
+    };
+    animationFrame = window.requestAnimationFrame(step);
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [value, duration]);
+
+  return <span>{prefix}{isDecimal ? count.toFixed(1) : Math.floor(count).toLocaleString()}{suffix}</span>;
+};
 
 // 8 Transactions for the Image 4 Radial Segmented Chart
 const RADIAL_SECTORS = [
@@ -59,7 +82,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
     <div className="h-full w-full overflow-y-auto bg-obsidian-950 text-sand-100 p-4 lg:p-6 font-sans select-none space-y-4">
       <div className="max-w-6xl mx-auto space-y-4">
         {/* NCRP & Case Coordination Header */}
-        <div className="bg-obsidian-900 border border-obsidian-750 p-4 rounded-[6px] space-y-3">
+        <div className="bg-obsidian-900 border border-obsidian-750 p-4 rounded-[6px] space-y-3 opacity-0 animate-fade-in-up">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-obsidian-750 pb-2.5">
             <div className="flex items-center space-x-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
@@ -67,11 +90,17 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
               </span>
             </div>
             <div className="flex items-center space-x-2 font-mono text-xs">
+              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-950 text-zinc-500 border border-obsidian-750 hidden sm:block">
+                OP-ID: 7X-99
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-950 text-zinc-500 border border-obsidian-750 hidden md:block">
+                SYNC: Just now
+              </span>
               <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-850 text-sand-300 border border-obsidian-750">
                 {sahyogTicket}
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-950 text-sand-100 border border-obsidian-750 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-sand-100" />
+              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-950 text-sand-100 border border-obsidian-750 flex items-center gap-1.5 animate-pulse-radar">
+                <span className="w-1.5 h-1.5 rounded-full bg-sand-100 animate-pulse" />
                 <span>SAHYOG ACTIVE</span>
               </span>
             </div>
@@ -100,18 +129,21 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
         {/* =================================================================== */}
         {/* ROW 1: Organic Funnel Flow (Reference 3) + Radial Petal Wheel (Reference 4) */}
         {/* =================================================================== */}
+        {/* =================================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Funnel Flow Chart (7 cols) - Inspired by Image 3 */}
-          <div className="lg:col-span-7 bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-5 space-y-4 text-left flex flex-col justify-between">
+          <div className="lg:col-span-7 bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-5 space-y-4 text-left flex flex-col justify-between opacity-0 animate-fade-in-up-delay-1">
             <div>
               <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
                 <div>
                   <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-bold font-mono text-sand-100">99.2%</span>
+                    <span className="text-2xl font-bold font-mono text-sand-100">
+                      <NumberTicker value={99.2} isDecimal suffix="%" />
+                    </span>
                     <span className="text-xs font-mono text-zinc-400">FUNDS TRACED</span>
                   </div>
                   <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">
-                    $1,984.00 accounted of $2,000.00 initial loss across 8 transactions
+                    <NumberTicker value={1984} prefix="$" suffix=".00" /> accounted of $2,000.00 initial loss across 8 transactions
                   </span>
                 </div>
                 <div className="text-right font-mono text-xs hidden sm:block">
@@ -253,7 +285,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
           </div>
 
           {/* Radial Segmented Wheel (5 cols) - Exact Match to Reference 4 */}
-          <div className="lg:col-span-5 bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-5 space-y-3 text-left flex flex-col justify-between">
+          <div className="lg:col-span-5 bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-5 space-y-3 text-left flex flex-col justify-between opacity-0 animate-fade-in-up-delay-1">
             <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
               <div>
                 <span className="text-[10px] font-mono text-zinc-500 uppercase block tracking-wider font-bold">
@@ -386,9 +418,10 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
         {/* =================================================================== */}
         {/* ROW 2: Dotted Detections (Image 3 Left) + Tactical Targets + Temporal Velocity */}
         {/* =================================================================== */}
+        {/* =================================================================== */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Card 1: Detections with Dotted Hairline Progress Tracks (Matching Image 3) */}
-          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
+          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left opacity-0 animate-fade-in-up-delay-2">
             <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
                 01 // DETECTION PATTERNS
@@ -421,7 +454,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
           </div>
 
           {/* Card 2: Key Syndicate Interceptions (Matching Image 3 Center) */}
-          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left flex flex-col justify-between">
+          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left flex flex-col justify-between opacity-0 animate-fade-in-up-delay-2">
             <div>
               <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
@@ -474,14 +507,15 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
 
             <button
               onClick={onOpenReport}
-              className="w-full py-1.5 bg-sand-100 hover:bg-white text-obsidian-950 rounded-[4px] text-xs font-mono font-bold transition cursor-pointer mt-2"
+              className="w-full py-1.5 bg-sand-100 hover:bg-white text-obsidian-950 rounded-[4px] text-xs font-mono font-bold transition cursor-pointer mt-2 animate-pulse-radar relative overflow-hidden group"
             >
-              PREPARE SECTION 91 NOTICE &rarr;
+              <span className="relative z-10">PREPARE SECTION 91 NOTICE &rarr;</span>
+              <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:animate-sweep"></div>
             </button>
           </div>
 
           {/* Card 3: Temporal Crime Window Velocity (Matching Image 3 Right) */}
-          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
+          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left opacity-0 animate-fade-in-up-delay-2">
             <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
                 03 // TEMPORAL VELOCITY
@@ -526,7 +560,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
         </div>
 
         {/* Quick Fast Jump Actions */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 opacity-0 animate-fade-in-up-delay-3">
           <button
             onClick={() => onNavigate('graph')}
             className="p-3 bg-obsidian-900 hover:bg-obsidian-850 border border-obsidian-750 hover:border-sand-300 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer"

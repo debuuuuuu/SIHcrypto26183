@@ -97,6 +97,30 @@ const config: Config = {
       transitionTimingFunction: {
         monomer: "cubic-bezier(0.22, 1, 0.36, 1)",
       },
+      keyframes: {
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        pulseRadar: {
+          '0%': { boxShadow: '0 0 0 0 rgba(245, 245, 245, 0.4)' },
+          '70%': { boxShadow: '0 0 0 6px rgba(245, 245, 245, 0)' },
+          '100%': { boxShadow: '0 0 0 0 rgba(245, 245, 245, 0)' },
+        },
+        sweep: {
+          '0%': { transform: 'translateX(-100%) skewX(-15deg)', opacity: '0' },
+          '50%': { opacity: '0.1' },
+          '100%': { transform: 'translateX(200%) skewX(-15deg)', opacity: '0' },
+        },
+      },
+      animation: {
+        'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+        'fade-in-up-delay-1': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards',
+        'fade-in-up-delay-2': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards',
+        'fade-in-up-delay-3': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards',
+        'pulse-radar': 'pulseRadar 2s infinite',
+        'sweep': 'sweep 2.5s infinite',
+      },
     },
   },
   plugins: [],
