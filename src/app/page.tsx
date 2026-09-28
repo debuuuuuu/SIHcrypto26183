@@ -31,16 +31,17 @@ import {
 } from '@/types/investigation';
 import {
   LayoutDashboard,
-  GitBranch,
-  Clock,
-  ShieldAlert,
-  ArrowLeftRight,
-  ShieldCheck,
-  Bot,
-  FileText,
-  ChevronLeft,
+  Network,
+  Clock3,
+  ScanSearch,
   Building2,
-  ShieldOff,
+  GitBranch,
+  Shield,
+  Archive,
+  Terminal,
+  FileText,
+  Bell,
+  ChevronLeft,
 } from 'lucide-react';
 
 type Screen = 'landing' | 'loading' | 'dashboard';
@@ -216,37 +217,37 @@ export default function Home(props: {
     );
   };
 
-  // Grouped Navigation Items (Section 10 of prompt + VASP & Mixers)
+  // Grouped Navigation Items matching Section 13 Master Spec
   const navGroups: NavGroup[] = [
     {
-      name: 'CASE',
+      name: '// CASE',
       items: [
         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-        { id: 'graph', label: 'Graph', icon: GitBranch, count: '9' },
-        { id: 'timeline', label: 'Timeline', icon: Clock, count: '8' },
+        { id: 'graph', label: 'Graph', icon: Network, count: '9' },
+        { id: 'timeline', label: 'Timeline', icon: Clock3, count: '8' },
       ],
     },
     {
-      name: 'ANALYSIS',
+      name: '// ANALYSIS',
       items: [
-        { id: 'detections', label: 'Detections', icon: ShieldAlert, count: '5' },
+        { id: 'detections', label: 'Detections', icon: ScanSearch, count: '5' },
         { id: 'vasp', label: 'VASP Clusters', icon: Building2, count: '2' },
-        { id: 'crosschain', label: 'Cross-chain', icon: ArrowLeftRight, count: '2' },
-        { id: 'privacy', label: 'Mixers & Privacy', icon: ShieldOff, count: '2' },
-        { id: 'evidence', label: 'Evidence', icon: ShieldCheck, count: '6' },
+        { id: 'crosschain', label: 'Cross-Chain', icon: GitBranch, count: '2' },
+        { id: 'privacy', label: 'Mixers & Privacy', icon: Shield, count: '2' },
+        { id: 'evidence', label: 'Evidence', icon: Archive, count: '6' },
       ],
     },
     {
-      name: 'ASSIST',
+      name: '// ASSIST',
       items: [
-        { id: 'ai', label: 'AI Investigator', icon: Bot },
+        { id: 'ai', label: 'AI Investigator', icon: Terminal },
         { id: 'report', label: 'Report', icon: FileText, count: 'PDF' },
       ],
     },
   ];
 
   return (
-    <div className="min-h-screen h-full flex-1 flex flex-col bg-[#0a0a0a] text-[#ededed] w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen h-full flex-1 flex flex-col bg-obsidian-950 text-sand-100 w-full max-w-full overflow-x-hidden font-sans">
       {/* Global Header */}
       <Header
         currentScreen={currentScreen}
@@ -273,54 +274,55 @@ export default function Home(props: {
 
       {/* Screen 3: Main Investigation Dashboard */}
       {currentScreen === 'dashboard' && (
-        <div className="no-print flex-1 flex overflow-hidden relative w-full max-w-full h-[calc(100vh-3.5rem)] min-h-[500px]">
-          {/* Left Navigation Sidebar - Compact, Monochromatic, Grouped */}
-          <aside className="no-print w-56 lg:w-60 bg-[#101010] border-r border-[#222222] flex flex-col justify-between shrink-0 select-none z-20">
-            <div className="p-3 space-y-4 overflow-y-auto">
-              {/* Quick Case Stats Card */}
-              <div className="bg-[#141414] border border-[#242424] p-3 space-y-2 font-mono text-xs">
-                <div className="flex items-center justify-between text-[#888888] border-b border-[#242424] pb-1.5">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#666666]">
-                    CASE TELEMETRY
+        <div className="no-print flex-1 flex overflow-hidden relative w-full max-w-full h-[calc(100vh-52px)] min-h-[500px]">
+          {/* Left Navigation Sidebar - 232px Obsidian Tactical Dock */}
+          <aside className="no-print w-[232px] bg-obsidian-950 border-r border-obsidian-750 flex flex-col justify-between shrink-0 select-none z-20">
+            <div className="p-3 space-y-3 overflow-y-auto">
+              {/* Quick Case Stats Telemetry Block */}
+              <div className="bg-obsidian-900 p-2.5 rounded-[4px] border border-obsidian-750 space-y-2 font-mono text-xs">
+                <div className="flex items-center justify-between text-zinc-400 border-b border-obsidian-750 pb-1.5">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-sand-100 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-graph-vasp" />
+                    TELEMETRY
                   </span>
-                  <span className="text-[10px] text-white font-semibold">
+                  <span className="text-[10px] text-zinc-400 font-mono">
                     {currentCase.chains.length} CHAINS
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
                   <div>
-                    <span className="text-[#666666] block text-[9px] uppercase tracking-wider">Total Sum</span>
-                    <span className="text-white font-bold">${currentCase.totalValue.toLocaleString()} USDT</span>
+                    <span className="text-zinc-600 block text-[9px] uppercase tracking-wider">Total Sum</span>
+                    <span className="text-sand-100 font-bold">${currentCase.totalValue.toLocaleString()}</span>
                   </div>
                   <div>
-                    <span className="text-[#666666] block text-[9px] uppercase tracking-wider">Risk Score</span>
-                    <span className="text-white font-bold">{currentCase.riskScore} / 100</span>
+                    <span className="text-zinc-600 block text-[9px] uppercase tracking-wider">Risk Score</span>
+                    <span className="text-graph-suspect font-bold">{currentCase.riskScore} / 100</span>
                   </div>
                   <div>
-                    <span className="text-[#666666] block text-[9px] uppercase tracking-wider">Entities</span>
-                    <span className="text-[#cccccc] font-medium">{currentCase.walletCount} Tracked</span>
+                    <span className="text-zinc-600 block text-[9px] uppercase tracking-wider">Entities</span>
+                    <span className="text-zinc-300 font-medium">{currentCase.walletCount} Tracked</span>
                   </div>
                   <div>
-                    <span className="text-[#666666] block text-[9px] uppercase tracking-wider">Timeframe</span>
-                    <span className="text-[#cccccc] font-medium">10m 48s</span>
+                    <span className="text-zinc-600 block text-[9px] uppercase tracking-wider">Timeframe</span>
+                    <span className="text-zinc-300 font-medium">10m 48s</span>
                   </div>
                 </div>
 
-                {/* NCRP Ack Pill in Telemetry */}
+                {/* NCRP Reference in Telemetry */}
                 {currentCase.ncrpAckNumber && (
-                  <div className="pt-1.5 border-t border-[#202020] text-[10px] text-blue-400 truncate">
-                    <span className="text-[#666666] block text-[8px] uppercase">NCRP Complaint</span>
-                    <span className="font-semibold select-all">{currentCase.ncrpAckNumber}</span>
+                  <div className="pt-1.5 border-t border-obsidian-750 text-[10px] truncate">
+                    <span className="text-zinc-600 block text-[8px] uppercase">NCRP Complaint</span>
+                    <span className="font-semibold text-sand-300 select-all">{currentCase.ncrpAckNumber}</span>
                   </div>
                 )}
               </div>
 
               {/* Grouped Navigation Menu */}
-              <div className="space-y-4 font-mono text-xs">
+              <div className="space-y-3 font-mono text-xs">
                 {navGroups.map((group) => (
-                  <div key={group.name} className="space-y-1">
-                    <div className="text-[10px] font-bold text-[#666666] uppercase tracking-wider px-2 pb-0.5">
+                  <div key={group.name} className="space-y-0.5">
+                    <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider px-2 py-0.5">
                       {group.name}
                     </div>
 
@@ -338,16 +340,16 @@ export default function Home(props: {
                               setActiveTab(item.id);
                             }
                           }}
-                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-sm transition text-left cursor-pointer ${
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[4px] transition-colors text-left cursor-pointer group ${
                             isActive
-                              ? 'bg-[#e5e5e5] text-[#000000] font-semibold'
-                              : 'text-[#888888] hover:text-[#ffffff] hover:bg-[#1a1a1a]'
+                              ? 'bg-obsidian-850 border-l-2 border-sand-300 text-sand-100 font-medium'
+                              : 'text-zinc-400 hover:text-sand-100 hover:bg-obsidian-900 border-l-2 border-transparent'
                           }`}
                         >
-                          <div className="flex items-center space-x-2.5 truncate">
+                          <div className="flex items-center space-x-2 truncate">
                             <Icon
-                              className={`w-4 h-4 shrink-0 ${
-                                isActive ? 'text-[#000000]' : 'text-[#666666]'
+                              className={`w-3.5 h-3.5 shrink-0 ${
+                                isActive ? 'text-sand-100' : 'text-zinc-400 group-hover:text-sand-100'
                               }`}
                             />
                             <span className="truncate text-xs">{item.label}</span>
@@ -355,10 +357,10 @@ export default function Home(props: {
 
                           {item.count && (
                             <span
-                              className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                              className={`text-[9px] px-1.5 py-0.2 rounded-[3px] font-mono ${
                                 isActive
-                                  ? 'bg-[#000000] text-[#ffffff]'
-                                  : 'bg-[#181818] text-[#888888] border border-[#2a2a2a]'
+                                  ? 'bg-obsidian-750 text-sand-100'
+                                  : 'text-zinc-600 group-hover:text-zinc-400'
                               }`}
                             >
                               {item.count}
@@ -372,17 +374,17 @@ export default function Home(props: {
               </div>
             </div>
 
-            {/* Sidebar Bottom: Alert Status indicator */}
-            <div className="p-3 border-t border-[#222222] bg-[#0c0c0c] text-[11px] font-mono space-y-1">
+            {/* Sidebar Bottom: Alert Status Trigger */}
+            <div className="p-3 border-t border-obsidian-750 bg-obsidian-950 text-[11px] font-mono">
               <button
                 onClick={() => setIsAlertsOpen(true)}
-                className="w-full flex items-center justify-between text-[#aaaaaa] hover:text-white transition p-1 rounded hover:bg-[#181818]"
+                className="w-full flex items-center justify-between text-zinc-400 hover:text-sand-100 transition-colors p-2 rounded-[4px] bg-obsidian-900 hover:bg-obsidian-850 border border-obsidian-750 hover:border-sand-850"
               >
-                <div className="flex items-center space-x-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span>Real-Time Alerts</span>
+                <div className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-graph-suspect" />
+                  <span className="font-medium text-xs">Live Alerts</span>
                 </div>
-                <span className="font-bold text-white bg-red-950 border border-red-800 px-1.5 py-0.2 rounded text-[10px]">
+                <span className="text-zinc-300 bg-obsidian-850 border border-obsidian-750 px-1.5 py-0.5 rounded-[3px] text-[10px]">
                   {alerts.length}
                 </span>
               </button>
@@ -390,7 +392,7 @@ export default function Home(props: {
           </aside>
 
           {/* Center Main Stage Content */}
-          <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#0a0a0a] relative">
+          <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-obsidian-950 relative">
             {activeTab === 'overview' && (
               <CaseOverviewView
                 onNavigate={(tab) => {

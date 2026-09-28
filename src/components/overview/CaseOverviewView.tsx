@@ -1,30 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   GitBranch,
   Clock,
   ShieldAlert,
-  ArrowLeftRight,
-  ShieldCheck,
-  Bot,
-  FileText,
   ArrowRight,
   ArrowUpRight,
   Shield,
-  Layers,
-  AlertTriangle,
-  ExternalLink,
+  Building2,
   Lock,
+  ExternalLink,
 } from 'lucide-react';
 import {
   DEMO_CASE,
   DEMO_WALLETS,
+  DEMO_TRANSACTIONS,
   DEMO_DETECTIONS,
   DEMO_EVIDENCE,
 } from '@/data/demoInvestigation';
 import { InvestigationCase } from '@/types/investigation';
-import { Building, ShieldOff, Building2 } from 'lucide-react';
 
 interface CaseOverviewViewProps {
   onNavigate: (tab: string) => void;
@@ -32,6 +27,18 @@ interface CaseOverviewViewProps {
   onSelectWallet: (walletId: string) => void;
   caseData?: InvestigationCase;
 }
+
+// 8 Transactions for the Image 4 Radial Segmented Chart
+const RADIAL_SECTORS = [
+  { id: 'TX-001', label: 'Victim Ingress', amount: '$2,000', pct: '100%', radiusRatio: 1.0, sub: 'ETH Inflow' },
+  { id: 'TX-002', label: 'Wallet B Split', amount: '$800', pct: '40%', radiusRatio: 0.72, sub: 'Dispersal' },
+  { id: 'TX-003', label: 'Wallet C Bridge', amount: '$700', pct: '35%', radiusRatio: 0.65, sub: 'Bridge Feed' },
+  { id: 'TX-004', label: 'Wallet D Park', amount: '$500', pct: '25%', radiusRatio: 0.52, sub: 'Cold Storage' },
+  { id: 'TX-005', label: 'Contract Lock', amount: '$700', pct: '35%', radiusRatio: 0.65, sub: 'L1 Gateway' },
+  { id: 'TX-006', label: 'Polygon Claim', amount: '$698', pct: '34.9%', radiusRatio: 0.64, sub: 'L2 Mint' },
+  { id: 'TX-007', label: 'Relay Outflow', amount: '$760', pct: '38%', radiusRatio: 0.69, sub: 'Layering' },
+  { id: 'TX-008', label: 'CEX Deposit', amount: '$680', pct: '34%', radiusRatio: 0.62, sub: 'Off-Ramp' },
+];
 
 export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
   onNavigate,
@@ -43,683 +50,526 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
   const ncrpAck = activeCase.ncrpAckNumber || '2026/NCRP/MH/09128';
   const sahyogTicket = activeCase.sahyogTicketId || 'I4C-SYG-2026-98124';
   const complainant = activeCase.complainantName || activeCase.reportingVictim || 'Rajesh K. Sharma';
-  const policeStation = activeCase.policeStationJurisdiction || 'Cyber Crime Police Station, BKC, Mumbai';
-  const firNo = activeCase.firOrGdNumber || 'FIR No. 142/2026 U/S 66D IT Act';
+  const policeStation = activeCase.policeStationJurisdiction || 'Cyber Crime Police Station, CID';
+  const firNo = activeCase.firOrGdNumber || 'FIR No. 412/2026 U/S 66D IT Act';
+
+  const [activeRadialIndex, setActiveRadialIndex] = useState<number | null>(null);
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-[#0a0a0a] text-white p-4 lg:p-6 font-sans select-none">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* NCRP & SAHYOG Coordination Dossier */}
-        <div className="border border-blue-900/60 bg-[#10141c] p-4 rounded-sm space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-900/40 pb-2.5">
+    <div className="h-full w-full overflow-y-auto bg-obsidian-950 text-sand-100 p-4 lg:p-6 font-sans select-none space-y-4">
+      <div className="max-w-6xl mx-auto space-y-4">
+        {/* NCRP & Case Coordination Header */}
+        <div className="bg-obsidian-900 border border-obsidian-750 p-4 rounded-[6px] space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-obsidian-750 pb-2.5">
             <div className="flex items-center space-x-2">
-              <Building className="w-4 h-4 text-blue-400" />
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-blue-300">
-                NCRP / I4C SAHYOG INTEGRATED COMPLAINT DOSSIER
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
+                OVERVIEW // CASE / {ncrpAck}
               </span>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">
+            <div className="flex items-center space-x-2 font-mono text-xs">
+              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-850 text-sand-300 border border-obsidian-750">
                 {sahyogTicket}
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-green-950 text-green-400 border border-green-800 font-bold">
-                SAHYOG FREEZE QUEUE ACTIVE
+              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-950 text-sand-100 border border-obsidian-750 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-sand-100" />
+                <span>SAHYOG ACTIVE</span>
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-            <div>
-              <span className="text-[#888888] block text-[10px]">NCRP Ack No:</span>
-              <span className="text-white font-bold">{ncrpAck}</span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono">
+            <div className="p-2.5 bg-obsidian-950 border border-obsidian-750 rounded-[4px]">
+              <span className="text-zinc-600 block text-[9px] uppercase">COMPLAINANT</span>
+              <span className="text-sand-100 font-semibold truncate block mt-0.5">{complainant}</span>
             </div>
-            <div>
-              <span className="text-[#888888] block text-[10px]">Complainant:</span>
-              <span className="text-white font-semibold">{complainant}</span>
+            <div className="p-2.5 bg-obsidian-950 border border-obsidian-750 rounded-[4px]">
+              <span className="text-zinc-600 block text-[9px] uppercase">FIR / GD REFERENCE</span>
+              <span className="text-sand-300 truncate block mt-0.5">{firNo}</span>
             </div>
-            <div>
-              <span className="text-[#888888] block text-[10px]">FIR / GD Ref:</span>
-              <span className="text-[#cccccc]">{firNo}</span>
+            <div className="p-2.5 bg-obsidian-950 border border-obsidian-750 rounded-[4px]">
+              <span className="text-zinc-600 block text-[9px] uppercase">JURISDICTION</span>
+              <span className="text-zinc-400 truncate block mt-0.5">{policeStation}</span>
             </div>
-            <div>
-              <span className="text-[#888888] block text-[10px]">Jurisdiction:</span>
-              <span className="text-[#cccccc] truncate block">{policeStation}</span>
-            </div>
-          </div>
-
-          {/* Quick Attribution Links */}
-          <div className="pt-1 flex flex-wrap items-center gap-2 text-[11px] font-mono">
-            <button
-              onClick={() => onNavigate('vasp')}
-              className="px-2.5 py-1 bg-[#16202c] hover:bg-[#1f2d3d] border border-blue-800/80 text-blue-300 rounded flex items-center space-x-1.5 transition"
-            >
-              <Building2 className="w-3.5 h-3.5" />
-              <span>Inspect Identified VASP Cluster (Demo Exchange)</span>
-            </button>
-
-            <button
-              onClick={() => onNavigate('privacy')}
-              className="px-2.5 py-1 bg-[#1a1424] hover:bg-[#281e36] border border-purple-800/80 text-purple-300 rounded flex items-center space-x-1.5 transition"
-            >
-              <ShieldOff className="w-3.5 h-3.5" />
-              <span>Inspect Privacy Protocol De-Anonymization</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Level 1: Investigation / Case Identity Banner */}
-        <div className="border border-[#262626] bg-[#121212] p-5 lg:p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#222222] pb-5">
-            <div>
-              <div className="flex items-center space-x-2 text-xs font-mono text-[#888888] uppercase tracking-wider mb-1">
-                <span>CASE ID</span>
-                <span>/</span>
-                <span className="text-[#ffffff] font-semibold">{activeCase.caseId}</span>
-                <span>/</span>
-                <span className="text-[#888888]">{activeCase.chains.join(' · ')}</span>
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight text-[#ffffff]">
-                {activeCase.caseName}
-              </h1>
-              <p className="text-sm text-[#999999] mt-1 max-w-2xl font-normal leading-relaxed">
-                {activeCase.classification} &mdash; Forensic investigation of reported fraudulent
-                funds transfer, multi-hop layering, and cross-chain obfuscation.
-              </p>
-            </div>
-
-            {/* Level 2: Primary Analytical Result - Risk Assessment */}
-            <div className="border border-[#333333] bg-[#181818] p-4 text-center shrink-0 min-w-[160px]">
-              <span className="text-[10px] font-mono text-[#888888] uppercase tracking-wider block">
-                OVERALL RISK LEVEL
-              </span>
-              <div className="text-3xl font-black font-mono text-[#ffffff] my-0.5">
-                {activeCase.riskScore}
-                <span className="text-sm text-[#666666] font-normal"> / 100</span>
-              </div>
-              <span className="inline-block text-[11px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 bg-[#ffffff] text-[#000000]">
-                HIGH RISK
-              </span>
-            </div>
-          </div>
-
-
-          {/* Forensic Metrics Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5">
-            <div className="border-l-2 border-[#333333] pl-3">
-              <span className="text-[10px] font-mono text-[#777777] uppercase block">
-                Total Traced Funds
-              </span>
-              <span className="text-lg font-bold font-mono text-[#ffffff]">
-                ${DEMO_CASE.totalValue.toLocaleString()} USDT
-              </span>
-            </div>
-            <div className="border-l-2 border-[#333333] pl-3">
-              <span className="text-[10px] font-mono text-[#777777] uppercase block">
-                Tracked Entities
-              </span>
-              <span className="text-lg font-bold font-mono text-[#ffffff]">
-                {DEMO_CASE.walletCount} Wallets
-              </span>
-            </div>
-            <div className="border-l-2 border-[#333333] pl-3">
-              <span className="text-[10px] font-mono text-[#777777] uppercase block">
-                Confirmed Patterns
-              </span>
-              <span className="text-lg font-bold font-mono text-[#ffffff]">
-                {DEMO_DETECTIONS.length} Detections
-              </span>
-            </div>
-            <div className="border-l-2 border-[#333333] pl-3">
-              <span className="text-[10px] font-mono text-[#777777] uppercase block">
-                Forensic Artifacts
-              </span>
-              <span className="text-lg font-bold font-mono text-[#ffffff]">
-                {DEMO_EVIDENCE.length} Items Sealed
-              </span>
+            <div className="p-2.5 bg-obsidian-950 border border-obsidian-750 rounded-[4px]">
+              <span className="text-zinc-600 block text-[9px] uppercase">LEDGER NETWORKS</span>
+              <span className="text-sand-100 font-semibold block mt-0.5">{activeCase.chains.join(' · ')}</span>
             </div>
           </div>
         </div>
 
-        {/* Section 01: Executive Incident Summary */}
-        <div className="border border-[#222222] bg-[#111111] p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#222222] pb-2.5">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#aaaaaa]">
-                01 &mdash; What Happened?
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-[#181818] border border-[#2a2a2a] text-[#888888] rounded">
-                INCIDENT NARRATIVE
-              </span>
-            </div>
-            <span className="text-[10px] font-mono text-[#666666]">
-              Click entity chips to inspect intelligence
-            </span>
-          </div>
-
-          <p className="text-sm text-[#cccccc] leading-relaxed">
-            On September 21, 2026 at 10:31:04 UTC, an unauthorized fraudulent disbursement of{' '}
-            <strong className="text-white font-mono">$2,000 USDT</strong> originated from Victim Wallet{' '}
-            <button
-              onClick={() => onSelectWallet('victim')}
-              className="inline-flex items-center space-x-1 text-xs bg-[#1a1a1a] hover:bg-[#252525] px-1.5 py-0.5 border border-[#333333] hover:border-[#666666] font-mono text-white transition cursor-pointer rounded-sm"
-              title="Click to inspect Victim Wallet"
-            >
-              <span>0xVIC7...cf1</span>
-              <ArrowUpRight className="w-3 h-3 text-[#888888]" />
-            </button>{' '}
-            into Suspect Primary{' '}
-            <button
-              onClick={() => onSelectWallet('suspect')}
-              className="inline-flex items-center space-x-1 text-xs bg-[#1f1a1a] hover:bg-[#2a2222] px-1.5 py-0.5 border border-[#443333] hover:border-[#884444] font-mono text-white transition cursor-pointer rounded-sm"
-              title="Click to inspect Suspect Primary"
-            >
-              <span>0x7A92...F2D</span>
-              <ArrowUpRight className="w-3 h-3 text-[#888888]" />
-            </button>
-            . Within 24 seconds, 100% of these funds were systematically split into three outgoing flows
-            (Fan-out pattern). One stream was subsequently bridged from Ethereum onto Polygon PoS and
-            deposited into Centralized Exchange Hotwallet{' '}
-            <button
-              onClick={() => onSelectWallet('exchange')}
-              className="inline-flex items-center space-x-1 text-xs bg-[#1a1a1a] hover:bg-[#252525] px-1.5 py-0.5 border border-[#333333] hover:border-[#666666] font-mono text-white transition cursor-pointer rounded-sm"
-              title="Click to inspect Exchange Endpoint"
-            >
-              <span>0xEXCH...4d401</span>
-              <ArrowUpRight className="w-3 h-3 text-[#888888]" />
-            </button>
-            .
-          </p>
-
-          {/* Quick Incident Execution Telemetry */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-xs">
-            <div className="bg-[#141414] border border-[#222222] p-2.5">
-              <span className="text-[10px] text-[#666666] block uppercase tracking-wider">
-                Initial Inflow
-              </span>
-              <span className="text-white font-semibold block mt-0.5">10:31:04 UTC</span>
-              <span className="text-[10px] text-[#888888]">$2,000 USDT</span>
-            </div>
-            <div className="bg-[#141414] border border-[#222222] p-2.5">
-              <span className="text-[10px] text-[#666666] block uppercase tracking-wider">
-                Fan-Out Velocity
-              </span>
-              <span className="text-white font-semibold block mt-0.5">24 Seconds</span>
-              <span className="text-[10px] text-[#888888]">100% Disbursed</span>
-            </div>
-            <div className="bg-[#141414] border border-[#222222] p-2.5">
-              <span className="text-[10px] text-[#666666] block uppercase tracking-wider">
-                Bridge Hop Time
-              </span>
-              <span className="text-white font-semibold block mt-0.5">3 Seconds</span>
-              <span className="text-[10px] text-[#888888]">L1 &rarr; Polygon PoS</span>
-            </div>
-            <div className="bg-[#141414] border border-[#222222] p-2.5">
-              <span className="text-[10px] text-[#666666] block uppercase tracking-wider">
-                CEX Liquidation
-              </span>
-              <span className="text-white font-semibold block mt-0.5">10:41:52 UTC</span>
-              <span className="text-[10px] text-[#888888]">$680 Ingested</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 02: Capital Dispersion & The Money Trail */}
-        <div className="border border-[#222222] bg-[#111111] p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#222222] pb-2.5">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#ffffff]">
-                02 &mdash; Capital Dispersion &amp; The Money Trail
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-[#181818] border border-[#2a2a2a] text-[#888888] rounded">
-                3 TRANCHES
-              </span>
-            </div>
-            <span className="text-xs font-mono text-[#888888]">Total: $2,000 USDT</span>
-          </div>
-
-          {/* Proportional Monochrome Allocation Bar */}
-          <div className="space-y-1.5 font-mono text-xs">
-            <div className="flex h-3 w-full border border-[#333333] overflow-hidden bg-[#0c0c0c]">
-              <div
-                style={{ width: '40%' }}
-                className="bg-[#ffffff] h-full border-r border-[#000000]"
-                title="Branch A: Wallet B ($800 - 40%)"
-              />
-              <div
-                style={{ width: '35%' }}
-                className="bg-[#888888] h-full border-r border-[#000000]"
-                title="Branch B: Wallet C ($700 - 35%)"
-              />
-              <div
-                style={{ width: '25%' }}
-                className="bg-[#383838] h-full"
-                title="Branch C: Wallet D ($500 - 25%)"
-              />
-            </div>
-            <div className="flex items-center justify-between text-[10px] text-[#777777]">
-              <span>Branch A: 40.0% ($800) Relay</span>
-              <span>Branch B: 35.0% ($700) Bridge</span>
-              <span>Branch C: 25.0% ($500) Parked</span>
-            </div>
-          </div>
-
-          {/* 3 Interactive Branch Breakdown Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-            {/* Branch A: Wallet B */}
-            <div className="border border-[#262626] bg-[#141414] p-4 flex flex-col justify-between space-y-3">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 bg-white text-black uppercase">
-                    Branch A &bull; 40.0%
+        {/* =================================================================== */}
+        {/* ROW 1: Organic Funnel Flow (Reference 3) + Radial Petal Wheel (Reference 4) */}
+        {/* =================================================================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Funnel Flow Chart (7 cols) - Inspired by Image 3 */}
+          <div className="lg:col-span-7 bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-5 space-y-4 text-left flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+                <div>
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-2xl font-bold font-mono text-sand-100">99.2%</span>
+                    <span className="text-xs font-mono text-zinc-400">FUNDS TRACED</span>
+                  </div>
+                  <span className="text-[11px] text-zinc-500 font-mono block mt-0.5">
+                    $1,984.00 accounted of $2,000.00 initial loss across 8 transactions
                   </span>
-                  <span className="text-xs font-bold font-mono text-white">$800.00</span>
                 </div>
-                <div className="font-mono text-xs">
-                  <span className="text-[#888888] text-[10px] block uppercase">Relay Address</span>
-                  <button
-                    onClick={() => onSelectWallet('walletB')}
-                    className="text-white hover:underline flex items-center space-x-1 font-semibold cursor-pointer"
-                  >
-                    <span>Wallet B (0x82BC...c41A)</span>
-                  </button>
+                <div className="text-right font-mono text-xs hidden sm:block">
+                  <span className="text-zinc-500 text-[10px] uppercase block">TOTAL VELOCITY</span>
+                  <span className="text-sand-100 font-bold">10m 48s</span>
                 </div>
-                <p className="text-xs text-[#aaaaaa] leading-relaxed">
-                  Acted as high-velocity transit relay. Forwarded{' '}
-                  <strong className="text-white font-mono">$760.00 (95.0%)</strong> to Downstream
-                  Recipient within 4 minutes.
-                </p>
               </div>
 
-              <div className="pt-2 border-t border-[#222222] flex items-center justify-between text-[11px] font-mono">
-                <span className="text-[#666666]">Residual: $40.00</span>
-                <button
-                  onClick={() => onSelectWallet('walletB')}
-                  className="text-white hover:underline flex items-center space-x-1 cursor-pointer"
+              {/* Organic Smooth Bezier Funnel Visualization (Exact match to Reference 3) */}
+              <div className="relative pt-4 pb-2">
+                {/* Stage column headers on top */}
+                <div className="grid grid-cols-4 text-center font-mono text-[11px] text-sand-300 pb-2">
+                  <div>
+                    <span className="text-sand-100 font-bold block">$2,000</span>
+                    <span className="text-[9px] text-zinc-500 uppercase">Victim</span>
+                  </div>
+                  <div>
+                    <span className="text-sand-100 font-bold block">$2,000</span>
+                    <span className="text-[9px] text-zinc-500 uppercase">Suspect</span>
+                  </div>
+                  <div>
+                    <span className="text-sand-100 font-bold block">$700</span>
+                    <span className="text-[9px] text-zinc-500 uppercase">Bridge</span>
+                  </div>
+                  <div>
+                    <span className="text-sand-100 font-bold block">$680</span>
+                    <span className="text-[9px] text-zinc-500 uppercase">CEX Outflow</span>
+                  </div>
+                </div>
+
+                {/* SVG Smooth Funnel Waves */}
+                <div className="w-full h-28 relative">
+                  <svg
+                    viewBox="0 0 600 120"
+                    preserveAspectRatio="none"
+                    className="w-full h-full overflow-visible"
+                  >
+                    <defs>
+                      <linearGradient id="funnelBand1" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.85" />
+                        <stop offset="33%" stopColor="#E5E5E5" stopOpacity="0.75" />
+                        <stop offset="66%" stopColor="#A3A3A3" stopOpacity="0.65" />
+                        <stop offset="100%" stopColor="#71717A" stopOpacity="0.55" />
+                      </linearGradient>
+                      <linearGradient id="funnelBand2" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#A3A3A3" stopOpacity="0.35" />
+                        <stop offset="50%" stopColor="#71717A" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#3F3F46" stopOpacity="0.18" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Outer ambient contour */}
+                    <path
+                      d="
+                        M 0, 10
+                        C 75, 10, 75, 10, 150, 10
+                        C 225, 10, 225, 35, 300, 35
+                        C 375, 35, 375, 45, 450, 45
+                        C 525, 45, 525, 45, 600, 45
+                        L 600, 75
+                        C 525, 75, 525, 75, 450, 75
+                        C 375, 75, 375, 85, 300, 85
+                        C 225, 85, 225, 110, 150, 110
+                        C 75, 110, 75, 110, 0, 110
+                        Z
+                      "
+                      fill="url(#funnelBand2)"
+                    />
+
+                    {/* Core dense flow stream */}
+                    <path
+                      d="
+                        M 0, 20
+                        C 75, 20, 75, 20, 150, 20
+                        C 225, 20, 225, 42, 300, 42
+                        C 375, 42, 375, 50, 450, 50
+                        C 525, 50, 525, 50, 600, 50
+                        L 600, 70
+                        C 525, 70, 525, 70, 450, 70
+                        C 375, 70, 375, 78, 300, 78
+                        C 225, 78, 225, 100, 150, 100
+                        C 75, 100, 75, 100, 0, 100
+                        Z
+                      "
+                      fill="url(#funnelBand1)"
+                    />
+
+                    {/* Vertical Stage Divider Hairlines */}
+                    <line x1="150" y1="0" x2="150" y2="120" stroke="#2A2A2A" strokeWidth="1" />
+                    <line x1="300" y1="0" x2="300" y2="120" stroke="#2A2A2A" strokeWidth="1" />
+                    <line x1="450" y1="0" x2="450" y2="120" stroke="#2A2A2A" strokeWidth="1" />
+                  </svg>
+
+                  {/* Percentage Badges inside the stream (Matching Image 3) */}
+                  <div className="absolute inset-0 grid grid-cols-4 items-center pointer-events-none">
+                    <div className="flex justify-center">
+                      <span className="px-2.5 py-0.5 bg-[#FFFFFF] text-[#050505] text-[10px] font-mono font-bold rounded-full shadow-sm">
+                        100%
+                      </span>
+                    </div>
+                    <div className="flex justify-center">
+                      <span className="px-2.5 py-0.5 bg-[#FFFFFF] text-[#050505] text-[10px] font-mono font-bold rounded-full shadow-sm">
+                        100%
+                      </span>
+                    </div>
+                    <div className="flex justify-center">
+                      <span className="px-2.5 py-0.5 bg-[#FFFFFF] text-[#050505] text-[10px] font-mono font-bold rounded-full shadow-sm">
+                        35%
+                      </span>
+                    </div>
+                    <div className="flex justify-center">
+                      <span className="px-2.5 py-0.5 bg-[#FFFFFF] text-[#050505] text-[10px] font-mono font-bold rounded-full shadow-sm">
+                        34%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stage Names Underneath */}
+                <div className="grid grid-cols-4 text-center font-mono text-[10px] text-zinc-400 pt-2 border-t border-obsidian-750">
+                  <span className="truncate">Ingress Loss</span>
+                  <span className="truncate">Syndicate Hub</span>
+                  <span className="truncate">Bridge Relay</span>
+                  <span className="truncate">CEX Hotwallet</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-obsidian-750 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+              <span>PATHWAY: ETHEREUM L1 &rarr; POLYGON BRIDGE &rarr; CEX OFF-RAMP</span>
+              <button
+                onClick={() => onNavigate('graph')}
+                className="text-sand-100 hover:text-sand-300 font-bold transition flex items-center space-x-1 cursor-pointer"
+              >
+                <span>OPEN GRAPH</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Radial Segmented Wheel (5 cols) - Exact Match to Reference 4 */}
+          <div className="lg:col-span-5 bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-5 space-y-3 text-left flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+              <div>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase block tracking-wider font-bold">
+                  TRANCHE SPECTRUM // 8 RECONSTRUCTED FLOWS
+                </span>
+                <h3 className="text-xs font-mono font-bold text-sand-100 mt-0.5">
+                  Analytical Radial Decomposition
+                </h3>
+              </div>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-[4px] bg-obsidian-850 border border-obsidian-750 text-sand-300">
+                8 TRANCHES
+              </span>
+            </div>
+
+            {/* SVG Segmented Radial Petal Wheel (Inspired by Image 4) */}
+            <div className="flex flex-col items-center justify-center py-1">
+              <div className="relative w-48 h-48">
+                <svg viewBox="-110 -110 220 220" className="w-full h-full overflow-visible">
+                  {/* Background 8-sector boundary petals */}
+                  {RADIAL_SECTORS.map((sector, i) => {
+                    const angleStep = (2 * Math.PI) / 8;
+                    const startAngle = i * angleStep - Math.PI / 2;
+                    const endAngle = startAngle + angleStep;
+                    const rOuter = 95;
+                    const rInner = 20;
+
+                    // Petal curve with soft corner
+                    const x1 = rOuter * Math.cos(startAngle);
+                    const y1 = rOuter * Math.sin(startAngle);
+                    const x2 = rOuter * Math.cos(endAngle);
+                    const y2 = rOuter * Math.sin(endAngle);
+                    const x3 = rInner * Math.cos(endAngle);
+                    const y3 = rInner * Math.sin(endAngle);
+                    const x4 = rInner * Math.cos(startAngle);
+                    const y4 = rInner * Math.sin(startAngle);
+
+                    // Inner shaded sector based on volume
+                    const rValue = 20 + sector.radiusRatio * 72;
+                    const vx1 = rValue * Math.cos(startAngle);
+                    const vy1 = rValue * Math.sin(startAngle);
+                    const vx2 = rValue * Math.cos(endAngle);
+                    const vy2 = rValue * Math.sin(endAngle);
+
+                    const isHovered = activeRadialIndex === i;
+
+                    return (
+                      <g
+                        key={sector.id}
+                        onMouseEnter={() => setActiveRadialIndex(i)}
+                        onMouseLeave={() => setActiveRadialIndex(null)}
+                        className="cursor-pointer transition-transform duration-150"
+                      >
+                        {/* Outer dark petal container */}
+                        <path
+                          d={`M ${x4} ${y4} L ${x1} ${y1} A ${rOuter} ${rOuter} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${rInner} ${rInner} 0 0 0 ${x4} ${y4} Z`}
+                          fill={isHovered ? '#1F1F1F' : '#141414'}
+                          stroke="#2A2A2A"
+                          strokeWidth="1"
+                        />
+
+                        {/* Inner shaded sector (Variable radius per volume) */}
+                        <path
+                          d={`M ${x4} ${y4} L ${vx1} ${vy1} A ${rValue} ${rValue} 0 0 1 ${vx2} ${vy2} L ${x3} ${y3} A ${rInner} ${rInner} 0 0 0 ${x4} ${y4} Z`}
+                          fill={isHovered ? '#FFFFFF' : '#D4D4D4'}
+                          opacity={isHovered ? 0.95 : 0.78}
+                        />
+
+                        {/* Label in sector */}
+                        {(() => {
+                          const midAngle = startAngle + angleStep / 2;
+                          const tx = (rOuter - 26) * Math.cos(midAngle);
+                          const ty = (rOuter - 26) * Math.sin(midAngle);
+                          return (
+                            <text
+                              x={tx}
+                              y={ty}
+                              fill={isHovered ? '#050505' : '#111111'}
+                              fontSize="8"
+                              fontWeight="bold"
+                              fontFamily="monospace"
+                              textAnchor="middle"
+                              dominantBaseline="central"
+                            >
+                              {sector.pct}
+                            </text>
+                          );
+                        })()}
+                      </g>
+                    );
+                  })}
+
+                  {/* Central hub */}
+                  <circle cx="0" cy="0" r="18" fill="#0A0A0A" stroke="#2A2A2A" strokeWidth="1.5" />
+                  <text
+                    x="0"
+                    y="1"
+                    fill="#F5F5F5"
+                    fontSize="7"
+                    fontFamily="monospace"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                  >
+                    8 TXs
+                  </text>
+                </svg>
+              </div>
+
+              {/* Dynamic tooltip on active sector */}
+              <div className="h-9 flex items-center justify-center font-mono text-center text-xs">
+                {activeRadialIndex !== null ? (
+                  <div className="space-y-0.5">
+                    <span className="text-sand-100 font-bold">
+                      {RADIAL_SECTORS[activeRadialIndex].id} &bull; {RADIAL_SECTORS[activeRadialIndex].label}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 block">
+                      Volume: {RADIAL_SECTORS[activeRadialIndex].amount} ({RADIAL_SECTORS[activeRadialIndex].pct} Allocation)
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-[10px] text-zinc-500">
+                    Hover segments to inspect hop volume &amp; percentage
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* =================================================================== */}
+        {/* ROW 2: Dotted Detections (Image 3 Left) + Tactical Targets + Temporal Velocity */}
+        {/* =================================================================== */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Card 1: Detections with Dotted Hairline Progress Tracks (Matching Image 3) */}
+          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
+            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
+                01 // DETECTION PATTERNS
+              </span>
+              <button
+                onClick={() => onNavigate('detections')}
+                className="text-[10px] font-mono text-zinc-400 hover:text-sand-100 transition"
+              >
+                VIEW ALL &rarr;
+              </button>
+            </div>
+
+            <div className="space-y-3 font-mono text-xs pt-1">
+              {[
+                { title: 'Rapid Fan-Out Dispersal', score: '96%', dots: '............................' },
+                { title: 'Centralized Exchange Off-Ramp', score: '94%', dots: '......................' },
+                { title: 'Layering Velocity (24s Window)', score: '91%', dots: '....................' },
+                { title: 'Cross-Chain Bridge Hopping', score: '89%', dots: '......................' },
+                { title: 'Dormant Cold Storage Parking', score: '78%', dots: '....................' },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between text-xs">
+                  <span className="text-zinc-300 font-sans text-xs truncate mr-2">{item.title}</span>
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <span className="text-zinc-600 hidden sm:inline select-none">{item.dots}</span>
+                    <span className="text-sand-100 font-bold font-mono">{item.score}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Card 2: Key Syndicate Interceptions (Matching Image 3 Center) */}
+          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
+                  02 // ACTIONABLE TARGETS
+                </span>
+                <span className="text-[10px] font-mono text-zinc-500">3 ENTITIES</span>
+              </div>
+
+              <div className="space-y-2 pt-1 font-mono text-xs">
+                <div
+                  onClick={() => onSelectWallet('suspect')}
+                  className="p-2 bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 rounded-[4px] cursor-pointer transition flex justify-between items-center"
                 >
-                  <span>Inspect &rarr;</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Branch B: Wallet C */}
-            <div className="border border-[#262626] bg-[#141414] p-4 flex flex-col justify-between space-y-3">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 bg-[#888888] text-black uppercase">
-                    Branch B &bull; 35.0%
+                  <div>
+                    <span className="text-sand-100 font-bold block text-[11px]">Primary Suspect</span>
+                    <span className="text-[10px] text-zinc-500 select-all">0x7A92...F2D</span>
+                  </div>
+                  <span className="text-[10px] text-sand-300 bg-obsidian-900 px-1.5 py-0.5 rounded-[4px] border border-obsidian-750">
+                    RISK 94
                   </span>
-                  <span className="text-xs font-bold font-mono text-white">$700.00</span>
                 </div>
-                <div className="font-mono text-xs">
-                  <span className="text-[#888888] text-[10px] block uppercase">Bridge Feeder</span>
-                  <button
-                    onClick={() => onSelectWallet('walletC')}
-                    className="text-white hover:underline flex items-center space-x-1 font-semibold cursor-pointer"
-                  >
-                    <span>Wallet C (0x19DE...a7C2)</span>
-                  </button>
-                </div>
-                <p className="text-xs text-[#aaaaaa] leading-relaxed">
-                  Bridge feeder. Routed funds through Demo Bridge to Polygon PoS, terminating with{' '}
-                  <strong className="text-white font-mono">$680.00</strong> into CEX Hotwallet.
-                </p>
-              </div>
 
-              <div className="pt-2 border-t border-[#222222] flex items-center justify-between text-[11px] font-mono">
-                <span className="text-[#666666]">Residual: $18.00</span>
-                <button
-                  onClick={() => onSelectWallet('walletC')}
-                  className="text-white hover:underline flex items-center space-x-1 cursor-pointer"
+                <div
+                  onClick={() => onSelectWallet('exchange')}
+                  className="p-2 bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 rounded-[4px] cursor-pointer transition flex justify-between items-center"
                 >
-                  <span>Inspect &rarr;</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Branch C: Wallet D */}
-            <div className="border border-[#262626] bg-[#141414] p-4 flex flex-col justify-between space-y-3">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 bg-[#383838] text-white uppercase">
-                    Branch C &bull; 25.0%
+                  <div>
+                    <span className="text-sand-100 font-bold block text-[11px]">Demo Exchange (CEX)</span>
+                    <span className="text-[10px] text-zinc-500 select-all">0x28C...556D</span>
+                  </div>
+                  <span className="text-[10px] text-sand-100 bg-obsidian-900 px-1.5 py-0.5 rounded-[4px] border border-obsidian-750 font-bold">
+                    $680 SUBPOENA
                   </span>
-                  <span className="text-xs font-bold font-mono text-white">$500.00</span>
                 </div>
-                <div className="font-mono text-xs">
-                  <span className="text-[#888888] text-[10px] block uppercase">Parking Address</span>
-                  <button
-                    onClick={() => onSelectWallet('walletD')}
-                    className="text-white hover:underline flex items-center space-x-1 font-semibold cursor-pointer"
-                  >
-                    <span>Wallet D (0x44AF...391B)</span>
-                  </button>
-                </div>
-                <p className="text-xs text-[#aaaaaa] leading-relaxed">
-                  Static parking wallet. Funds remain dormant with zero downstream movement observed.
-                  Primary candidate for on-chain freeze.
-                </p>
-              </div>
 
-              <div className="pt-2 border-t border-[#222222] flex items-center justify-between text-[11px] font-mono">
-                <span className="text-[#ffffff] font-semibold">100% Retained ($500)</span>
-                <button
+                <div
                   onClick={() => onSelectWallet('walletD')}
-                  className="text-white hover:underline flex items-center space-x-1 cursor-pointer"
+                  className="p-2 bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 rounded-[4px] cursor-pointer transition flex justify-between items-center"
                 >
-                  <span>Inspect &rarr;</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 03: Why Is It Suspicious? (Algorithmic Behavioral Detections) */}
-        <div className="border border-[#222222] bg-[#111111] p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#222222] pb-2.5">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#aaaaaa]">
-                03 &mdash; Why Is It Suspicious?
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-[#181818] border border-[#2a2a2a] text-[#888888] rounded">
-                BEHAVIORAL HEURISTICS
-              </span>
-            </div>
-            <button
-              onClick={() => onNavigate('detections')}
-              className="text-xs font-mono text-[#888888] hover:text-white flex items-center space-x-1 cursor-pointer"
-            >
-              <span>View All 5 Detections</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-            <div className="border border-[#242424] bg-[#141414] p-3.5 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-[#888888] uppercase block">
-                  Temporal Compression
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 bg-[#222222] text-white border border-[#333333] font-bold">
-                  +25 PTS
-                </span>
-              </div>
-              <p className="text-xs text-[#cccccc] leading-relaxed">
-                Funds remained in the suspect wallet for less than 135 seconds before complete
-                disbursement, indicating automated script execution.
-              </p>
-              <div className="pt-1.5 border-t border-[#202020]">
-                <button
-                  onClick={() => onNavigate('timeline')}
-                  className="text-[11px] font-mono text-[#888888] hover:text-white flex items-center space-x-1 cursor-pointer"
-                >
-                  <span>Verify Chronology &rarr;</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="border border-[#242424] bg-[#141414] p-3.5 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-[#888888] uppercase block">
-                  Structural Splitting
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 bg-[#222222] text-white border border-[#333333] font-bold">
-                  +25 PTS
-                </span>
-              </div>
-              <p className="text-xs text-[#cccccc] leading-relaxed">
-                $2,000 was atomized into $800, $700, and $500 across 3 clean intermediary addresses
-                to evade AML reporting thresholds.
-              </p>
-              <div className="pt-1.5 border-t border-[#202020]">
-                <button
-                  onClick={() => onNavigate('graph')}
-                  className="text-[11px] font-mono text-[#888888] hover:text-white flex items-center space-x-1 cursor-pointer"
-                >
-                  <span>Inspect Fan-Out Graph &rarr;</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="border border-[#242424] bg-[#141414] p-3.5 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-[#888888] uppercase block">
-                  Cross-Chain Obfuscation
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 bg-[#222222] text-white border border-[#333333] font-bold">
-                  +18 PTS
-                </span>
-              </div>
-              <p className="text-xs text-[#cccccc] leading-relaxed">
-                Wallet C routed funds through the Polygon Bridge to sever direct L1 ledger
-                continuity before centralized exchange deposit.
-              </p>
-              <div className="pt-1.5 border-t border-[#202020]">
-                <button
-                  onClick={() => onNavigate('crosschain')}
-                  className="text-[11px] font-mono text-[#888888] hover:text-white flex items-center space-x-1 cursor-pointer"
-                >
-                  <span>Inspect Bridge Protocol &rarr;</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 04: Actionable Law Enforcement / Compliance Interventions */}
-        <div className="border border-[#262626] bg-[#131313] p-5 space-y-3 font-mono text-xs">
-          <div className="flex items-center justify-between border-b border-[#222222] pb-2">
-            <span className="font-bold uppercase tracking-wider text-white flex items-center space-x-2">
-              <Shield className="w-3.5 h-3.5 text-white" />
-              <span>04 &mdash; Actionable Forensic Interventions &amp; Preservation Targets</span>
-            </span>
-            <span className="text-[10px] text-[#888888]">3 TACTICAL TARGETS</span>
-          </div>
-
-          <div className="space-y-2 text-[11px]">
-            <div className="bg-[#181818] border border-[#242424] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <span className="font-bold text-white uppercase text-[10px] px-1.5 py-0.2 bg-[#222222] border border-[#333333]">
-                    CEX SUBPOENA
-                  </span>
-                  <span className="text-white font-semibold">
-                    Centralized Exchange Hotwallet (0xEXCH...4d401)
+                  <div>
+                    <span className="text-sand-100 font-bold block text-[11px]">Static Cold Wallet D</span>
+                    <span className="text-[10px] text-zinc-500 select-all">0x4E8...311C</span>
+                  </div>
+                  <span className="text-[10px] text-sand-300 bg-obsidian-900 px-1.5 py-0.5 rounded-[4px] border border-obsidian-750">
+                    $500 FREEZE
                   </span>
                 </div>
-                <p className="text-[#888888] font-sans text-xs">
-                  Serve emergency preservation order on exchange for internal deposit account KYC,
-                  login IP logs, and associated fiat banking withdrawal accounts.
-                </p>
               </div>
-              <button
-                onClick={() => onSelectWallet('exchange')}
-                className="shrink-0 px-2.5 py-1.5 bg-[#222222] hover:bg-[#2c2c2c] text-white border border-[#3a3a3a] text-[10px] font-bold uppercase transition cursor-pointer"
-              >
-                Inspect Target
-              </button>
             </div>
-
-            <div className="bg-[#181818] border border-[#242424] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <span className="font-bold text-white uppercase text-[10px] px-1.5 py-0.2 bg-[#222222] border border-[#333333]">
-                    ASSET FREEZE
-                  </span>
-                  <span className="text-white font-semibold">
-                    Static Intermediary Wallet D (0x44AF...391B)
-                  </span>
-                </div>
-                <p className="text-[#888888] font-sans text-xs">
-                  Holds $500.00 USDT static balance (25% of total theft). Submit urgent blacklisting
-                  and freeze notice to Tether issuer.
-                </p>
-              </div>
-              <button
-                onClick={() => onSelectWallet('walletD')}
-                className="shrink-0 px-2.5 py-1.5 bg-[#222222] hover:bg-[#2c2c2c] text-white border border-[#3a3a3a] text-[10px] font-bold uppercase transition cursor-pointer"
-              >
-                Inspect Target
-              </button>
-            </div>
-
-            <div className="bg-[#181818] border border-[#242424] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <span className="font-bold text-white uppercase text-[10px] px-1.5 py-0.2 bg-[#222222] border border-[#333333]">
-                    BRIDGE AUDIT
-                  </span>
-                  <span className="text-white font-semibold">
-                    Demo Bridge Liquidity Protocol (0xBR1D...c77E)
-                  </span>
-                </div>
-                <p className="text-[#888888] font-sans text-xs">
-                  Extract cross-chain relayer transaction records and analyze gas station funding
-                  sources for the destination address on Polygon PoS.
-                </p>
-              </div>
-              <button
-                onClick={() => onSelectWallet('bridge')}
-                className="shrink-0 px-2.5 py-1.5 bg-[#222222] hover:bg-[#2c2c2c] text-white border border-[#3a3a3a] text-[10px] font-bold uppercase transition cursor-pointer"
-              >
-                Inspect Target
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 05: Supporting Forensic Evidence Summary */}
-        <div className="border border-[#222222] bg-[#111111] p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-[#222222] pb-2">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#aaaaaa]">
-              05 &mdash; Supporting Forensic Evidence
-            </span>
-            <button
-              onClick={() => onNavigate('evidence')}
-              className="text-xs font-mono text-[#888888] hover:text-white flex items-center space-x-1 cursor-pointer"
-            >
-              <span>View All {DEMO_EVIDENCE.length} Items</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-            {DEMO_EVIDENCE.slice(0, 3).map((item) => (
-              <div
-                key={item.id}
-                onClick={() => onNavigate('evidence')}
-                className="border border-[#222222] bg-[#141414] hover:bg-[#1a1a1a] hover:border-[#3a3a3a] p-3 cursor-pointer transition space-y-1"
-              >
-                <div className="flex items-center justify-between text-[10px] font-mono">
-                  <span className="font-bold text-white">{item.id}</span>
-                  <span className="text-[#888888]">{item.timestamp.split('T')[1]}</span>
-                </div>
-                <div className="text-xs font-semibold text-[#cccccc] truncate">{item.type}</div>
-                <div className="text-[11px] font-mono text-[#888888]">
-                  Confidence: <span className="text-white">{item.confidence}%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Section 06: Recommended Next Actions & Workspaces */}
-        <div className="border border-[#262626] bg-[#121212] p-5 space-y-4">
-          <div className="border-b border-[#222222] pb-2">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#ffffff]">
-              06 &mdash; Investigation Workspaces &amp; Next Steps
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <button
-              onClick={() => onNavigate('graph')}
-              className="p-3.5 border border-[#262626] bg-[#161616] hover:bg-[#202020] hover:border-[#404040] text-left transition flex items-start space-x-3 group cursor-pointer"
-            >
-              <GitBranch className="w-5 h-5 text-white shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-white font-mono block group-hover:underline">
-                  Transaction Graph &rarr;
-                </span>
-                <span className="text-[11px] text-[#888888] leading-tight block mt-0.5">
-                  Inspect the interactive multi-hop fund flow across {DEMO_CASE.walletCount} entities.
-                </span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => onNavigate('timeline')}
-              className="p-3.5 border border-[#262626] bg-[#161616] hover:bg-[#202020] hover:border-[#404040] text-left transition flex items-start space-x-3 group cursor-pointer"
-            >
-              <Clock className="w-5 h-5 text-white shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-white font-mono block group-hover:underline">
-                  Forensic Timeline &rarr;
-                </span>
-                <span className="text-[11px] text-[#888888] leading-tight block mt-0.5">
-                  Verify chronological transfer order and sub-minute intervals.
-                </span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => onNavigate('detections')}
-              className="p-3.5 border border-[#262626] bg-[#161616] hover:bg-[#202020] hover:border-[#404040] text-left transition flex items-start space-x-3 group cursor-pointer"
-            >
-              <ShieldAlert className="w-5 h-5 text-white shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-white font-mono block group-hover:underline">
-                  Pattern Detections &rarr;
-                </span>
-                <span className="text-[11px] text-[#888888] leading-tight block mt-0.5">
-                  Inspect {DEMO_DETECTIONS.length} algorithmic signatures with isolated subgraphs.
-                </span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => onNavigate('crosschain')}
-              className="p-3.5 border border-[#262626] bg-[#161616] hover:bg-[#202020] hover:border-[#404040] text-left transition flex items-start space-x-3 group cursor-pointer"
-            >
-              <ArrowLeftRight className="w-5 h-5 text-white shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-white font-mono block group-hover:underline">
-                  Cross-Chain Flow &rarr;
-                </span>
-                <span className="text-[11px] text-[#888888] leading-tight block mt-0.5">
-                  Understand Ethereum to Polygon bridge execution within 3 seconds.
-                </span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => onNavigate('ai')}
-              className="p-3.5 border border-[#262626] bg-[#161616] hover:bg-[#202020] hover:border-[#404040] text-left transition flex items-start space-x-3 group cursor-pointer"
-            >
-              <Bot className="w-5 h-5 text-white shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-white font-mono block group-hover:underline">
-                  AI Investigator &rarr;
-                </span>
-                <span className="text-[11px] text-[#888888] leading-tight block mt-0.5">
-                  Ask grounded questions with strict evidence references.
-                </span>
-              </div>
-            </button>
 
             <button
               onClick={onOpenReport}
-              className="p-3.5 border border-[#ffffff] bg-[#ffffff] text-[#000000] hover:bg-[#e0e0e0] text-left transition flex items-start space-x-3 group cursor-pointer"
+              className="w-full py-1.5 bg-sand-100 hover:bg-white text-obsidian-950 rounded-[4px] text-xs font-mono font-bold transition cursor-pointer mt-2"
             >
-              <FileText className="w-5 h-5 text-[#000000] shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-[#000000] font-mono block">
-                  Generate Dossier &rarr;
-                </span>
-                <span className="text-[11px] text-[#444444] leading-tight block mt-0.5">
-                  Export formal court-admissible PDF investigation dossier.
-                </span>
-              </div>
+              PREPARE SECTION 91 NOTICE &rarr;
             </button>
           </div>
+
+          {/* Card 3: Temporal Crime Window Velocity (Matching Image 3 Right) */}
+          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
+            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
+                03 // TEMPORAL VELOCITY
+              </span>
+              <span className="text-[10px] font-mono text-sand-300">10-MIN WINDOW</span>
+            </div>
+
+            <div className="space-y-2 font-mono text-xs">
+              <div className="flex justify-between items-baseline">
+                <span className="text-xl font-bold text-sand-100">10m 48s</span>
+                <span className="text-[10px] text-zinc-500">PEAK: 14:21:08 UTC</span>
+              </div>
+
+              {/* Grayscale Activity Heatmap Grid (Inspired by Sales by Hour in Image 3) */}
+              <div className="space-y-1 pt-1">
+                <div className="grid grid-cols-10 gap-1 h-5">
+                  {[1.0, 0.9, 0.7, 0.6, 0.8, 0.4, 0.9, 0.5, 0.3, 0.8].map((val, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        backgroundColor:
+                          val > 0.8 ? '#FFFFFF' : val > 0.6 ? '#A3A3A3' : val > 0.4 ? '#52525B' : '#2A2A2A',
+                      }}
+                      className="rounded-[2px] h-full"
+                      title={`Minute +${idx} activity intensity`}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-between text-[9px] text-zinc-500">
+                  <span>14:21:00</span>
+                  <span>14:25:00</span>
+                  <span>14:31:48</span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-obsidian-750 text-[10px] text-zinc-400 space-y-1 font-sans">
+                <p>• 100% of victim disbursement atomized within 24 seconds.</p>
+                <p>• Cross-chain bridge hop completed in 69 seconds.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Fast Jump Actions */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+          <button
+            onClick={() => onNavigate('graph')}
+            className="p-3 bg-obsidian-900 hover:bg-obsidian-850 border border-obsidian-750 hover:border-sand-300 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer"
+          >
+            <div>
+              <span className="text-[11px] font-mono font-bold text-sand-100 block">TRANSACTION GRAPH</span>
+              <span className="text-[9px] font-mono text-zinc-500">Interactive network</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+          </button>
+
+          <button
+            onClick={() => onNavigate('timeline')}
+            className="p-3 bg-obsidian-900 hover:bg-obsidian-850 border border-obsidian-750 hover:border-sand-300 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer"
+          >
+            <div>
+              <span className="text-[11px] font-mono font-bold text-sand-100 block">TIMELINE LEDGER</span>
+              <span className="text-[9px] font-mono text-zinc-500">8 Traced transfers</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+          </button>
+
+          <button
+            onClick={() => onNavigate('evidence')}
+            className="p-3 bg-obsidian-900 hover:bg-obsidian-850 border border-obsidian-750 hover:border-sand-300 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer"
+          >
+            <div>
+              <span className="text-[11px] font-mono font-bold text-sand-100 block">EVIDENCE LOCKBOX</span>
+              <span className="text-[9px] font-mono text-zinc-500">6 Sealed artifacts</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+          </button>
+
+          <button
+            onClick={onOpenReport}
+            className="p-3 bg-sand-100 hover:bg-white text-obsidian-950 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer shadow-xs"
+          >
+            <div>
+              <span className="text-[11px] font-mono font-bold block">COURT DOSSIER</span>
+              <span className="text-[9px] font-mono text-obsidian-850">Sec 65B Certified</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-obsidian-950" />
+          </button>
         </div>
       </div>
     </div>

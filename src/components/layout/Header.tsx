@@ -2,16 +2,14 @@
 
 import React, { useState } from 'react';
 import {
-  FileText,
   RotateCcw,
   Download,
   Info,
   Check,
   Shield,
-  Layers,
   X,
   Bell,
-  Building,
+  FileText,
 } from 'lucide-react';
 import { DEMO_CASE } from '@/data/demoInvestigation';
 import { InvestigationCase } from '@/types/investigation';
@@ -55,122 +53,124 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="no-print h-13 bg-[#111111] border-b border-[#242424] flex items-center justify-between px-4 sticky top-0 z-40 select-none">
-        {/* Left: Brand & Case Identity */}
-        <div className="flex items-center space-x-4">
+      <header className="no-print h-[52px] bg-obsidian-950 border-b border-obsidian-750 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-40 select-none transition-all">
+        {/* Left: Tactical Brand & Case Coordinates (Section 7) */}
+        <div className="flex items-center space-x-3 sm:space-x-4">
           <div
             onClick={onReset}
-            className="flex items-center space-x-2.5 cursor-pointer group"
+            className="flex items-center space-x-2 cursor-pointer group"
+            title="Return to investigation portal"
           >
-            <div className="w-7 h-7 rounded bg-[#222222] border border-[#383838] flex items-center justify-center text-white font-bold group-hover:bg-[#2e2e2e] transition">
-              <Layers className="w-4 h-4 text-white" />
+            <div className="w-6 h-6 rounded-[4px] bg-obsidian-850 border border-obsidian-750 flex items-center justify-center group-hover:border-sand-300 transition-colors">
+              <span className="text-[11px] font-mono font-bold text-sand-100">M</span>
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-sans font-bold tracking-tight text-sm text-white">
-                  MONOMER
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#1f1f1f] text-[#aaaaaa] border border-[#333333]">
-                  SIH 2026
-                </span>
-              </div>
-            </div>
+            <span className="font-mono font-bold tracking-wider text-xs text-sand-100 group-hover:text-white transition-colors">
+              MONOMER
+            </span>
+            <span className="text-[10px] font-mono text-zinc-500 uppercase px-1.5 py-0.2 bg-obsidian-850 border border-obsidian-750 rounded-[2px] hidden sm:inline">
+              SIH 2026
+            </span>
           </div>
 
-          {/* Case Identity when in Dashboard */}
+          {/* Case Identity Coordinates when in Dashboard */}
           {currentScreen === 'dashboard' && (
-            <div className="hidden md:flex items-center space-x-2.5 pl-4 border-l border-[#242424]">
-              <div className="flex items-center space-x-1.5 text-xs font-mono text-[#888888]">
-                <span>CASE</span>
-                <span className="font-semibold text-white px-1.5 py-0.5 bg-[#1a1a1a] border border-[#2a2a2a] rounded">
-                  {activeCase.caseId}
-                </span>
-              </div>
+            <div className="hidden md:flex items-center space-x-2 pl-3 border-l border-obsidian-750 font-mono text-xs">
+              <span className="text-[11px] font-mono text-sand-100 px-2 py-0.5 bg-obsidian-850 border border-obsidian-750 rounded-[4px]">
+                {activeCase.caseId}
+              </span>
 
-              {/* NCRP Badge */}
+              {/* NCRP Reference */}
               {activeCase.ncrpAckNumber && (
-                <div className="hidden lg:flex items-center space-x-1.5 text-[11px] font-mono text-blue-400 px-2 py-0.5 rounded bg-blue-950/40 border border-blue-900/60">
-                  <Building className="w-3 h-3 text-blue-400" />
-                  <span>NCRP: {activeCase.ncrpAckNumber}</span>
+                <div className="hidden lg:flex items-center space-x-1.5 text-[11px] text-zinc-400 px-2 py-0.5 rounded-[4px] bg-obsidian-850 border border-obsidian-750">
+                  <span className="text-zinc-600">NCRP:</span>
+                  <span className="text-sand-300">{activeCase.ncrpAckNumber}</span>
                 </div>
               )}
 
-              <div className="flex items-center space-x-1.5 text-[11px] font-mono text-[#cccccc] px-2 py-0.5 rounded bg-[#181818] border border-[#2e2e2e]">
-                <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
-                <span className="tracking-wide uppercase font-medium">{activeCase.status}</span>
+              {/* Case Status */}
+              <div className="hidden xl:flex items-center space-x-1.5 text-[10px] text-zinc-400 px-2 py-0.5 rounded-[4px] bg-obsidian-850 border border-obsidian-750">
+                <span className="w-1.5 h-1.5 rounded-full bg-sand-100" />
+                <span>CASE ACTIVE</span>
               </div>
             </div>
           )}
         </div>
 
-        {/* Right: Actions & Demo Badges */}
+        {/* Right: Technical Telemetry & Operational Actions (Section 7) */}
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Real-Time Alerts Bell */}
+          {/* RPC Live Telemetry */}
+          <div className="hidden sm:flex items-center space-x-1.5 px-2 py-0.5 bg-obsidian-850 border border-obsidian-750 rounded-[4px] text-[11px] font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-sand-100"></span>
+            <span className="text-zinc-500">RPC</span>
+            <span className="text-sand-300 font-medium">ONLINE</span>
+          </div>
+
+          {/* FIU-IND Gateway Status */}
+          <div className="hidden xl:flex items-center space-x-1.5 px-2 py-0.5 bg-obsidian-850 border border-obsidian-750 rounded-[4px] text-[11px] font-mono text-zinc-400">
+            <Shield className="w-3 h-3 text-zinc-500" />
+            <span>FIU-IND GATEWAY</span>
+          </div>
+
+          {/* Real-Time Alerts Drawer Trigger */}
           {currentScreen === 'dashboard' && onToggleAlerts && (
             <button
               onClick={onToggleAlerts}
-              className="relative p-2 bg-[#1c1c1c] hover:bg-[#252525] border border-[#383838] text-white rounded transition cursor-pointer flex items-center justify-center"
+              className="relative px-2.5 py-1 bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 hover:border-sand-300 text-zinc-400 hover:text-sand-100 rounded-[4px] transition-colors cursor-pointer flex items-center space-x-1.5 text-[11px] font-mono"
               title="Open Real-Time LEA Alert Center"
             >
-              <Bell className="w-4 h-4 text-white" />
+              <Bell className="w-3 h-3 text-zinc-400" />
+              <span>{String(unreadAlertCount).padStart(2, '0')} ALERTS</span>
               {unreadAlertCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 bg-red-600 text-white rounded-full text-[9px] font-bold font-mono animate-pulse">
-                  {unreadAlertCount}
-                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F5F5F5] ml-0.5" />
               )}
             </button>
           )}
 
-          {/* Simulated Data Badge */}
-          <div className="hidden lg:flex items-center space-x-1.5 bg-[#181818] border border-[#2a2a2a] px-2.5 py-1 rounded text-[11px] font-mono text-[#888888]">
-            <Shield className="w-3 h-3 text-[#aaaaaa]" />
-            <span>LEA CERTIFIED</span>
-          </div>
-
-          {/* DEMO MODE Badge */}
+          {/* SIH Info Modal Button */}
           <button
             onClick={() => setShowDemoModal(true)}
-            className="flex items-center space-x-1.5 bg-[#1c1c1c] hover:bg-[#252525] border border-[#383838] px-2.5 py-1 rounded text-xs font-mono font-medium text-white transition cursor-pointer"
-            title="Prototype scope & disclaimer notice"
+            className="flex items-center space-x-1 px-2.5 py-1 bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 text-zinc-400 hover:text-sand-100 rounded-[4px] text-[11px] font-mono transition-colors cursor-pointer"
+            title="Forensic architecture specification"
           >
-            <span>SIH INFO</span>
-            <Info className="w-3 h-3 text-[#888888]" />
+            <Info className="w-3 h-3 text-zinc-400" />
+            <span className="hidden sm:inline">SIH INFO</span>
           </button>
 
-          {/* Direct Dashboard button when on landing screen */}
+          {/* Direct Dashboard Button (Landing screen only) */}
           {currentScreen === 'landing' && onDirectDashboard && (
             <button
               onClick={onDirectDashboard}
-              className="flex items-center space-x-1.5 bg-[#ffffff] hover:bg-[#e5e5e5] text-black px-3 py-1 rounded text-xs font-bold transition cursor-pointer shadow-sm"
+              className="flex items-center space-x-1.5 bg-sand-100 hover:bg-white text-obsidian-950 px-3.5 py-1 rounded-[4px] text-xs font-mono font-bold transition-colors cursor-pointer shadow-xs"
             >
-              <span>Enter Dashboard &rarr;</span>
+              <span>CONSOLE</span>
+              <span>&rarr;</span>
             </button>
           )}
 
-          {/* Dashboard Control Buttons */}
+          {/* Operational Buttons (Dashboard screen only) */}
           {currentScreen === 'dashboard' && (
-            <div className="flex items-center space-x-1.5 border-l border-[#242424] pl-2 sm:pl-3">
+            <div className="flex items-center space-x-2 border-l border-obsidian-750 pl-2 sm:pl-3">
               <button
                 onClick={handleExport}
-                className="hidden sm:flex items-center space-x-1.5 bg-[#181818] hover:bg-[#222222] border border-[#2e2e2e] hover:border-[#404040] px-2.5 py-1 rounded text-xs text-[#cccccc] hover:text-white transition"
-                title="Export metadata to clipboard"
+                className="hidden sm:flex items-center space-x-1.5 bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 hover:border-sand-300 px-2.5 py-1 rounded-[4px] text-[11px] font-mono text-sand-300 hover:text-sand-100 transition-colors cursor-pointer"
+                title="Export telemetry metadata to clipboard"
               >
-                <Download className="w-3.5 h-3.5 text-[#888888]" />
-                <span>Export</span>
+                <Download className="w-3 h-3 text-zinc-400" />
+                <span>EXPORT</span>
               </button>
 
               <button
                 onClick={onOpenReport}
-                className="flex items-center space-x-1.5 bg-[#ffffff] hover:bg-[#e5e5e5] text-[#000000] px-3 py-1 rounded text-xs font-semibold shadow-sm transition"
+                className="flex items-center space-x-1.5 bg-sand-100 hover:bg-white text-obsidian-950 px-3 py-1 rounded-[4px] text-xs font-mono font-bold transition-colors cursor-pointer shadow-xs"
               >
-                <FileText className="w-3.5 h-3.5 text-black" />
-                <span>Report</span>
+                <FileText className="w-3 h-3 text-obsidian-950" />
+                <span>COURT REPORT</span>
               </button>
 
               <button
                 onClick={onReset}
-                className="p-1.5 text-[#888888] hover:text-white hover:bg-[#222222] rounded border border-transparent hover:border-[#333333] transition"
-                title="Reset to Start Screen"
+                className="p-1.5 text-zinc-400 hover:text-sand-100 hover:bg-obsidian-850 rounded-[4px] border border-transparent hover:border-obsidian-750 transition-colors cursor-pointer"
+                title="Reset to Ingestion Portal"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
@@ -179,55 +179,55 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* Copy Notification Toast */}
+      {/* Copied to clipboard toast */}
       {copiedNotification && (
-        <div className="fixed bottom-4 right-4 z-50 bg-[#1c1c1c] border border-[#444444] text-white text-xs px-3 py-2 rounded shadow-xl flex items-center space-x-2">
-          <Check className="w-4 h-4 text-white" />
-          <span>Case metadata copied to clipboard</span>
+        <div className="fixed bottom-6 right-6 bg-obsidian-850 border border-obsidian-750 text-sand-100 px-3.5 py-2 rounded-[4px] shadow-2xl flex items-center space-x-2 text-xs font-mono z-50">
+          <Check className="w-3.5 h-3.5 text-sand-100" />
+          <span>Case telemetry copied to clipboard</span>
         </div>
       )}
 
-      {/* Prototype Scope Modal */}
+      {/* SIH Info Modal */}
       {showDemoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="bg-[#141414] border border-[#333333] rounded-lg max-w-md w-full p-5 shadow-2xl space-y-4 text-left">
-            <div className="flex items-center justify-between border-b border-[#242424] pb-2.5">
-              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-white">
-                SIH 2026 System Architecture
-              </h3>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 select-none">
+          <div className="max-w-lg w-full bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-6 space-y-4 shadow-2xl text-left">
+            <div className="flex items-center justify-between border-b border-obsidian-750 pb-3">
+              <div className="flex items-center space-x-2">
+                <span className="text-sand-100 font-mono font-bold text-xs uppercase tracking-wider">
+                  Monomer Forensic Architecture &bull; SIH 2026
+                </span>
+              </div>
               <button
                 onClick={() => setShowDemoModal(false)}
-                className="text-[#888888] hover:text-white"
+                className="text-zinc-400 hover:text-sand-100 p-1 rounded-[4px] hover:bg-obsidian-850 transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-[#cccccc] leading-relaxed">
-              <strong className="text-white">MONOMER</strong> integrates direct NCRP/SAHYOG complaint ingestion, live multi-chain indexer APIs, VASP clustering algorithms, mixer de-anonymization heuristics, and automated LEA court-admissible reports under Section 65B of the Bharatiya Sakshya Adhiniyam / Evidence Act.
-            </p>
-
-            <div className="bg-[#0c0c0c] border border-[#242424] rounded p-3 text-[11px] font-mono text-[#888888] space-y-1.5">
-              <div className="flex justify-between">
-                <span>Active Portal:</span>
-                <span className="text-white font-sans">NCRP & SAHYOG Sync</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Indexed Chains:</span>
-                <span className="text-white font-sans">Ethereum, Polygon, Arbitrum, Bitcoin</span>
-              </div>
-              <div className="flex justify-between">
-                <span>VASP Identification:</span>
-                <span className="text-white font-sans">Heuristic Sweep & Hotwallet Pool Attribution</span>
+            <div className="space-y-3 text-xs text-zinc-400 font-sans leading-relaxed">
+              <p>
+                <strong className="text-sand-100 font-mono">Objective:</strong> Rapid de-anonymization and VASP attribution of suspect cryptocurrency addresses reported in cyber fraud cases (NCRP / I4C).
+              </p>
+              <div className="p-3 rounded-[4px] bg-obsidian-850 border border-obsidian-750 space-y-1.5 font-mono text-[11px]">
+                <div className="text-sand-100 font-semibold">Core Forensic Capabilities:</div>
+                <div className="text-zinc-400 leading-normal">
+                  • Automated Multi-Input Clustering Heuristics<br/>
+                  • FIU-IND Registered VASP Attribution Engine<br/>
+                  • Peel-Chain &amp; Cross-Chain Bridge Ingress Tracing<br/>
+                  • Section 65B Indian Evidence Act Print-Ready Dossier<br/>
+                  • Real-Time LEA Alert Center with Instant Freeze Schedules<br/>
+                  • Public Multi-Chain JSON-RPC Blockchain Indexer
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-end pt-1">
+            <div className="flex justify-end pt-2">
               <button
                 onClick={() => setShowDemoModal(false)}
-                className="px-4 py-1.5 bg-[#ffffff] hover:bg-[#e5e5e5] text-black text-xs font-semibold rounded transition"
+                className="px-3.5 py-1.5 bg-sand-100 hover:bg-white text-obsidian-950 rounded-[4px] text-xs font-mono font-semibold transition cursor-pointer"
               >
-                Close
+                DISMISS
               </button>
             </div>
           </div>

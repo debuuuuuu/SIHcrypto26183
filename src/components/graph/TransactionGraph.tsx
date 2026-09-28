@@ -17,7 +17,7 @@ import {
   NodeTypes,
   EdgeTypes,
 } from '@xyflow/react';
-import { ForensicNode, NetworkZoneNode } from './CustomNodes';
+import { ForensicNode, NetworkZoneNode, OrbitalTracksNode } from './CustomNodes';
 import { ForensicEdge } from './ForensicEdge';
 import {
   DEMO_WALLETS,
@@ -35,7 +35,6 @@ import {
   Zap,
   HelpCircle,
   X,
-  MapPin,
   ChevronDown,
   Layers,
   Map,
@@ -56,6 +55,7 @@ interface TransactionGraphProps {
 const nodeTypes: NodeTypes = {
   forensicNode: ForensicNode as any,
   networkZone: NetworkZoneNode as any,
+  orbitalTracks: OrbitalTracksNode as any,
 };
 
 const edgeTypes: EdgeTypes = {
@@ -92,30 +92,30 @@ const PRIMARY_LAUNDERING_EDGES = [
   'TX-DEMO-008',
 ];
 
-// Generous, breathable coordinates for Horizontal Flow (Left-to-Right timeline)
-const HORIZONTAL_COORDS: Record<string, { x: number; y: number }> = {
-  victim: { x: 40, y: 290 },
-  suspect: { x: 410, y: 290 },
-  walletB: { x: 790, y: 40 },
-  walletC: { x: 790, y: 290 },
-  walletD: { x: 790, y: 540 },
-  downstreamDest: { x: 1180, y: 40 },
-  bridge: { x: 1180, y: 290 },
-  polygonWallet: { x: 1590, y: 290 },
-  exchange: { x: 1990, y: 290 },
+// Flow layout: Linear progression from L1 ingress to L2 liquidation
+const FLOW_COORDS: Record<string, { x: number; y: number }> = {
+  victim: { x: 80, y: 320 },
+  suspect: { x: 380, y: 320 },
+  walletB: { x: 740, y: 120 },
+  walletC: { x: 740, y: 320 },
+  walletD: { x: 740, y: 520 },
+  downstreamDest: { x: 1080, y: 120 },
+  bridge: { x: 1080, y: 320 },
+  polygonWallet: { x: 1420, y: 320 },
+  exchange: { x: 1780, y: 320 },
 };
 
-// Optimal Coordinates for Vertical Hierarchy (Top-to-Bottom tree)
-const VERTICAL_COORDS: Record<string, { x: number; y: number }> = {
-  victim: { x: 500, y: 40 },
-  suspect: { x: 500, y: 240 },
-  walletB: { x: 100, y: 450 },
-  walletC: { x: 500, y: 450 },
-  walletD: { x: 900, y: 450 },
-  downstreamDest: { x: 100, y: 660 },
-  bridge: { x: 500, y: 660 },
-  polygonWallet: { x: 500, y: 870 },
-  exchange: { x: 500, y: 1080 },
+// Orbital layout (Section 22): Concentric circular topology around Suspect hub
+const ORBITAL_COORDS: Record<string, { x: number; y: number }> = {
+  suspect: { x: 700, y: 400 }, // Center Hub
+  victim: { x: 700, y: 720 },  // South Ingress
+  walletB: { x: 380, y: 260 }, // North-West
+  walletC: { x: 700, y: 120 }, // North Bridge Feeder
+  walletD: { x: 1020, y: 260 }, // North-East Cold Parking
+  downstreamDest: { x: 140, y: 160 }, // West Terminus
+  bridge: { x: 550, y: -60 }, // North-West Bridge
+  polygonWallet: { x: 850, y: -60 }, // North-East Polygon
+  exchange: { x: 1150, y: -60 }, // Far North-East CEX Outflow
 };
 
 const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
@@ -130,8 +130,8 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
 }) => {
   const { fitView, setCenter } = useReactFlow();
 
-  // Layout mode: 'horizontal' (default widescreen timeline) or 'vertical' (top-down tree)
-  const [layout, setLayout] = useState<'horizontal' | 'vertical'>('horizontal');
+  // Section 22: Graph Modes: 'flow' or 'orbital'
+  const [graphMode, setGraphMode] = useState<'flow' | 'orbital'>('flow');
   const [chainFilter, setChainFilter] = useState<'all' | 'Ethereum' | 'Polygon'>('all');
   const [showZones, setShowZones] = useState(true);
   const [showMiniMap, setShowMiniMap] = useState(false);
@@ -149,114 +149,103 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
   // Initial auto-fit view
   useEffect(() => {
     const timer = setTimeout(() => {
-      fitView({ padding: 0.12, duration: 450 });
-    }, 120);
+      fitView({ padding: 0.16, duration: 400 });
+    }, 100);
     return () => clearTimeout(timer);
-  }, [fitView]);
+  }, [fitView, graphMode]);
 
-  // Generate Network Zone Group Nodes based on layout
+  // Network Zones for Flow & Orbital
   const zoneNodes: Node[] = useMemo(() => {
     if (!showZones) return [];
 
-    if (layout === 'horizontal') {
+    if (graphMode === 'orbital') {
       return [
         {
-          id: 'zone-eth',
-          type: 'networkZone',
-          position: { x: 15, y: 15 },
-          data: {
-            id: 'zone-eth',
-            title: 'ETHEREUM MAINNET (L1)',
-            subtitle: '7 ENTITIES • $2,000 USDT INFLOW & LAYERING',
-            chain: 'Ethereum',
-            width: 1460,
-            height: 740,
-          },
-          draggable: false,
-          selectable: false,
-          zIndex: -1,
-        },
-        {
-          id: 'zone-poly',
-          type: 'networkZone',
-          position: { x: 1545, y: 200 },
-          data: {
-            id: 'zone-poly',
-            title: 'POLYGON POS (L2)',
-            subtitle: '2 ENTITIES • $698 USDT LIQUIDATION',
-            chain: 'Polygon',
-            width: 735,
-            height: 345,
-          },
-          draggable: false,
-          selectable: false,
-          zIndex: -1,
-        },
-      ];
-    } else {
-      return [
-        {
-          id: 'zone-eth',
-          type: 'networkZone',
-          position: { x: 60, y: 15 },
-          data: {
-            id: 'zone-eth',
-            title: 'ETHEREUM MAINNET (L1)',
-            subtitle: '7 ENTITIES • $2,000 USDT INFLOW & LAYERING',
-            chain: 'Ethereum',
-            width: 1130,
-            height: 855,
-          },
-          draggable: false,
-          selectable: false,
-          zIndex: -1,
-        },
-        {
-          id: 'zone-poly',
-          type: 'networkZone',
-          position: { x: 440, y: 830 },
-          data: {
-            id: 'zone-poly',
-            title: 'POLYGON POS (L2)',
-            subtitle: '2 ENTITIES • $698 USDT LIQUIDATION',
-            chain: 'Polygon',
-            width: 370,
-            height: 460,
-          },
+          id: 'orbital-tracks-bg',
+          type: 'orbitalTracks',
+          position: { x: 0, y: -60 },
+          data: { id: 'orbital-tracks-bg' },
           draggable: false,
           selectable: false,
           zIndex: -1,
         },
       ];
     }
-  }, [showZones, layout]);
 
-  // Transform raw DEMO_WALLETS into React Flow Nodes with dynamic positions & orientation
+    return [
+      {
+        id: 'zone-eth',
+        type: 'networkZone',
+        position: { x: 30, y: 40 },
+        data: {
+          id: 'zone-eth',
+          title: 'ETHEREUM MAINNET (L1)',
+          subtitle: '7 ENTITIES • $2,000 USDT INGRESS & LAYERING',
+          chain: 'Ethereum',
+          width: 1300,
+          height: 600,
+        },
+        draggable: false,
+        selectable: false,
+        zIndex: -1,
+      },
+      {
+        id: 'zone-poly',
+        type: 'networkZone',
+        position: { x: 1370, y: 220 },
+        data: {
+          id: 'zone-poly',
+          title: 'POLYGON POS (L2)',
+          subtitle: '2 ENTITIES • $680 USDT OFF-RAMP TERMINUS',
+          chain: 'Polygon',
+          width: 530,
+          height: 250,
+        },
+        draggable: false,
+        selectable: false,
+        zIndex: -1,
+      },
+    ];
+  }, [showZones, graphMode]);
+
+  // Section 26: Connected Entity Discovery for Focus/Dimming
+  const connectedWalletIds = useMemo(() => {
+    if (!selectedWalletId) return new Set<string>();
+    const connected = new Set<string>([selectedWalletId]);
+    DEMO_TRANSACTIONS.forEach((tx) => {
+      if (tx.from === selectedWalletId) connected.add(tx.to);
+      if (tx.to === selectedWalletId) connected.add(tx.from);
+    });
+    return connected;
+  }, [selectedWalletId]);
+
+  // Transform raw DEMO_WALLETS into React Flow Nodes
   const initialNodes: Node[] = useMemo(() => {
-    const hasAnyNodeFilter =
-      chainFilter !== 'all' ||
-      Boolean(activeDetection) ||
-      highlightedNodeIds.length > 0 ||
-      isTracingPrimary;
-
-    const coordsMap = layout === 'horizontal' ? HORIZONTAL_COORDS : VERTICAL_COORDS;
+    const coordsMap = graphMode === 'orbital' ? ORBITAL_COORDS : FLOW_COORDS;
+    const hasFocusFilter = Boolean(selectedWalletId) || Boolean(activeDetection) || highlightedNodeIds.length > 0 || isTracingPrimary || chainFilter !== 'all';
 
     const entityNodes: Node[] = Object.values(DEMO_WALLETS).map((wallet) => {
       const isSelected = selectedWalletId === wallet.id;
+      const isConnected = connectedWalletIds.has(wallet.id);
       const isDetectionAffected = activeDetection
         ? activeDetection.affectedNodes.includes(wallet.id)
         : false;
       const isExternalHighlighted = highlightedNodeIds.includes(wallet.id);
       const isPrimaryTraced = isTracingPrimary && PRIMARY_LAUNDERING_NODES.includes(wallet.id);
 
-      const isHighlighted =
-        isSelected || isDetectionAffected || isExternalHighlighted || isPrimaryTraced;
+      const isFocused =
+        isSelected ||
+        isConnected ||
+        isDetectionAffected ||
+        isExternalHighlighted ||
+        isPrimaryTraced;
 
       // Filter by chain if active
       const matchesChainFilter =
         chainFilter === 'all' || wallet.chain.toLowerCase() === chainFilter.toLowerCase();
 
-      const isDimmed = (hasAnyNodeFilter && !isHighlighted) || !matchesChainFilter;
+      // Section 26: Dimming rule
+      const isDimmed = (hasFocusFilter && !isFocused) || !matchesChainFilter;
 
       return {
         id: wallet.id,
@@ -264,9 +253,9 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
         position: coordsMap[wallet.id] || wallet.position,
         data: {
           ...wallet,
-          layout,
+          layout: graphMode,
           isSelected,
-          isHighlighted,
+          isHighlighted: isFocused,
           isDimmed,
         },
       };
@@ -275,49 +264,43 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     return [...zoneNodes, ...entityNodes];
   }, [
     selectedWalletId,
+    connectedWalletIds,
     activeDetection,
     highlightedNodeIds,
     chainFilter,
     isTracingPrimary,
-    layout,
+    graphMode,
     zoneNodes,
   ]);
 
-  // Transform raw DEMO_TRANSACTIONS into React Flow Edges with correct handle IDs and styling
+  // Transform raw DEMO_TRANSACTIONS into React Flow Edges
   const initialEdges: Edge[] = useMemo(() => {
-    const hasAnyEdgeFilter =
-      chainFilter !== 'all' ||
-      Boolean(activeDetection) ||
-      highlightedEdgeIds.length > 0 ||
-      isTracingPrimary;
-
-    const isHorizontal = layout === 'horizontal';
+    const isHorizontal = graphMode === 'flow';
     const sourceHandleId = isHorizontal ? 'source-right' : 'source-bottom';
     const targetHandleId = isHorizontal ? 'target-left' : 'target-top';
 
+    const hasFocusFilter = Boolean(selectedWalletId) || Boolean(activeDetection) || highlightedEdgeIds.length > 0 || isTracingPrimary || chainFilter !== 'all';
+
     return DEMO_TRANSACTIONS.map((tx) => {
       const isSelected = selectedTransactionId === tx.id;
+      const isDirectlyConnected = selectedWalletId ? (tx.from === selectedWalletId || tx.to === selectedWalletId) : false;
       const isDetectionAffected = activeDetection
         ? activeDetection.affectedEdges.includes(tx.id)
         : false;
       const isExternalHighlighted = highlightedEdgeIds.includes(tx.id);
-      const isConnectedToSelectedNode =
-        selectedWalletId === tx.from || selectedWalletId === tx.to;
       const isPrimaryTraced = isTracingPrimary && PRIMARY_LAUNDERING_EDGES.includes(tx.id);
 
       const isHighlighted =
         isSelected ||
+        isDirectlyConnected ||
         isDetectionAffected ||
         isExternalHighlighted ||
-        isConnectedToSelectedNode ||
         isPrimaryTraced;
 
       const matchesChainFilter =
         chainFilter === 'all' || tx.chain.toLowerCase() === chainFilter.toLowerCase();
 
-      const isDimmed = (hasAnyEdgeFilter && !isHighlighted) || !matchesChainFilter;
-
-      const strokeColor = isHighlighted ? '#ffffff' : isDimmed ? '#2f343a' : '#71717a';
+      const isDimmed = (hasFocusFilter && !isHighlighted) || !matchesChainFilter;
 
       return {
         id: tx.id,
@@ -328,8 +311,8 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
         type: 'forensicEdge',
         data: {
           ...tx,
-          layout,
           percentage: TX_PERCENTAGES[tx.id],
+          layout: graphMode,
           isHighlighted,
           isDimmed,
           showLabels: showEdgeLabels,
@@ -337,36 +320,32 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
           animateFlow,
           onSelectTx: onSelectTransaction,
         },
-        style: {
-          stroke: strokeColor,
-          strokeWidth: isHighlighted ? 2.8 : isDimmed ? 1.4 : 1.8,
-          opacity: isDimmed ? 0.35 : 1,
-        },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: isHighlighted ? '#ffffff' : isDimmed ? '#444444' : '#888888',
-          width: 14,
-          height: 14,
+          width: 10,
+          height: 10,
+          color: isHighlighted ? '#F5F5F5' : isDimmed ? 'rgba(255,255,255,0.12)' : '#555555',
         },
       };
     });
   }, [
     selectedTransactionId,
+    selectedWalletId,
     activeDetection,
     highlightedEdgeIds,
-    selectedWalletId,
     chainFilter,
+    isTracingPrimary,
     showEdgeLabels,
     showPercentages,
     animateFlow,
-    isTracingPrimary,
-    layout,
     onSelectTransaction,
+    graphMode,
   ]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
+  // Sync state changes with nodes and edges
   useEffect(() => {
     setNodes(initialNodes);
   }, [initialNodes, setNodes]);
@@ -375,6 +354,7 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     setEdges(initialEdges);
   }, [initialEdges, setEdges]);
 
+  // Click on node: opens intelligence panel & triggers focus
   const handleNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
       if (node.type === 'networkZone') return;
@@ -383,6 +363,7 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     [onSelectWallet]
   );
 
+  // Click on edge: selects transaction
   const handleEdgeClick = useCallback(
     (_: React.MouseEvent, edge: Edge) => {
       onSelectTransaction(edge.id);
@@ -390,377 +371,281 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     [onSelectTransaction]
   );
 
-  const handleFitView = () => {
-    fitView({ padding: 0.12, duration: 400 });
-  };
-
-  const handleLayoutToggle = (newLayout: 'horizontal' | 'vertical') => {
-    setLayout(newLayout);
-    setTimeout(() => {
-      fitView({ padding: 0.12, duration: 400 });
-    }, 60);
-  };
-
+  // Focus entity from select dropdown
   const handleFocusEntity = (walletId: string) => {
     if (!walletId) return;
     onSelectWallet(walletId);
-    const coordsMap = layout === 'horizontal' ? HORIZONTAL_COORDS : VERTICAL_COORDS;
-    const pos = coordsMap[walletId];
-    if (pos) {
-      setCenter(pos.x + 125, pos.y + 85, { zoom: 1.05, duration: 500 });
+    const coordsMap = graphMode === 'orbital' ? ORBITAL_COORDS : FLOW_COORDS;
+    const target = coordsMap[walletId];
+    if (target) {
+      setCenter(target.x + 20, target.y + 20, { duration: 400, zoom: 1.15 });
     }
+  };
+
+  const handleFitView = () => {
+    fitView({ padding: 0.16, duration: 350 });
   };
 
   const handleReset = () => {
+    setGraphMode('flow');
     setChainFilter('all');
     setIsTracingPrimary(false);
-    setShowEdgeLabels(true);
-    setShowPercentages(true);
-    setShowZones(true);
-    setAnimateFlow(true);
     onSelectWallet(null);
-    if (onClearHighlight) {
-      onClearHighlight();
-    }
-    setTimeout(() => {
-      fitView({ padding: 0.12, duration: 400 });
-    }, 50);
+    if (onClearHighlight) onClearHighlight();
+    fitView({ padding: 0.16, duration: 350 });
   };
 
   return (
-    <div
-      className="relative w-full h-full min-h-[500px] bg-[#0a0a0c] select-none overflow-hidden"
-      style={{ width: '100%', height: '100%', minHeight: '500px' }}
-    >
-      {/* Top Operations Command Bar */}
-      <div className="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        {/* Left Control Cluster: Layout Switcher + Chain Filter + Toggles */}
-        <div className="flex items-center flex-wrap gap-1.5 pointer-events-auto">
-          {/* Layout Switcher (Horizontal Flow vs Vertical Tree) */}
-          <div className="flex items-center space-x-1 bg-[#131518]/95 border border-zinc-800 px-2 py-1 rounded-md shadow-lg backdrop-blur text-xs font-mono">
-            <span className="text-zinc-500 text-[10px] mr-1 hidden sm:inline">VIEW:</span>
+    <div className="w-full h-full relative select-none bg-obsidian-950">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        onNodeClick={handleNodeClick}
+        onEdgeClick={handleEdgeClick}
+        minZoom={0.25}
+        maxZoom={2.4}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.85 }}
+        proOptions={{ hideAttribution: true }}
+      >
+        {/* Section 23: Obsidian Dot Grid */}
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={24}
+          size={1}
+          color="rgba(255, 255, 255, 0.08)"
+          className="bg-obsidian-950"
+        />
+
+        {showMiniMap && (
+          <MiniMap
+            nodeColor={(n) => {
+              if (n.id === 'suspect')  return '#DDDDDD';
+              if (n.id === 'victim')   return '#AAAAAA';
+              if (n.id === 'exchange') return '#888888';
+              if (n.id === 'bridge')   return '#666666';
+              return '#555555';
+            }}
+            nodeStrokeWidth={1}
+            nodeBorderRadius={12}
+            className="!bg-[#0C0C0C] !border !border-[#202020] !rounded-[4px] !bottom-3 !right-3"
+          />
+        )}
+      </ReactFlow>
+
+      {/* Section 28: Compact Tactical HUD (Height: 30px, Background: #111216, Border: #23252D) */}
+      <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-30 font-mono text-[11px]">
+        {/* Left Cluster: Modes & Filters */}
+        <div className="flex items-center space-x-1.5 pointer-events-auto">
+          {/* Mode Switcher: FLOW vs ORBITAL */}
+          <div className="h-[30px] flex items-center bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[4px] shadow-md">
             <button
-              onClick={() => handleLayoutToggle('horizontal')}
-              className={`flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-semibold transition cursor-pointer ${
-                layout === 'horizontal'
-                  ? 'bg-white text-black shadow-sm'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+              onClick={() => setGraphMode('flow')}
+              className={`px-2.5 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
+                graphMode === 'flow'
+                  ? 'bg-sand-100 text-obsidian-950 font-bold'
+                  : 'text-zinc-400 hover:text-sand-100'
               }`}
-              title="Horizontal Timeline Flow (Optimized for widescreen monitors)"
             >
-              <span>↔ Horizontal Flow</span>
+              FLOW
             </button>
             <button
-              onClick={() => handleLayoutToggle('vertical')}
-              className={`flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-semibold transition cursor-pointer ${
-                layout === 'vertical'
-                  ? 'bg-white text-black shadow-sm'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+              onClick={() => setGraphMode('orbital')}
+              className={`px-2.5 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
+                graphMode === 'orbital'
+                  ? 'bg-sand-100 text-obsidian-950 font-bold'
+                  : 'text-zinc-400 hover:text-sand-100'
               }`}
-              title="Vertical Tree Hierarchy"
             >
-              <span>↕ Tree</span>
+              ORBITAL
             </button>
           </div>
 
-          {/* Chain Filter */}
-          <div className="flex items-center space-x-1 bg-[#131518]/95 border border-zinc-800 px-2 py-1 rounded-md shadow-lg backdrop-blur text-xs font-mono">
-            <div className="flex items-center space-x-1 text-zinc-500 mr-1">
-              <Filter className="w-3 h-3" />
-              <span className="text-[10px] hidden sm:inline">CHAIN:</span>
-            </div>
-
-            {(['all', 'Ethereum', 'Polygon'] as const).map((c) => (
-              <button
-                key={c}
-                onClick={() => setChainFilter(c)}
-                className={`px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer ${
-                  chainFilter === c
-                    ? 'bg-zinc-200 text-black font-semibold'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-                }`}
-              >
-                {c === 'all' ? 'ALL' : c === 'Ethereum' ? 'ETH L1' : 'POLYGON'}
-              </button>
-            ))}
+          {/* Chain Filters: ALL / ETH / POL */}
+          <div className="h-[30px] flex items-center bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[4px] shadow-md">
+            <button
+              onClick={() => setChainFilter('all')}
+              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
+                chainFilter === 'all'
+                  ? 'bg-obsidian-850 text-sand-100 font-bold border border-sand-850'
+                  : 'text-zinc-400 hover:text-sand-100'
+              }`}
+            >
+              ALL
+            </button>
+            <button
+              onClick={() => setChainFilter('Ethereum')}
+              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
+                chainFilter === 'Ethereum'
+                  ? 'bg-obsidian-850 text-sand-100 font-bold border border-sand-850'
+                  : 'text-zinc-400 hover:text-sand-100'
+              }`}
+            >
+              ETH
+            </button>
+            <button
+              onClick={() => setChainFilter('Polygon')}
+              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
+                chainFilter === 'Polygon'
+                  ? 'bg-obsidian-850 text-sand-100 font-bold border border-sand-850'
+                  : 'text-zinc-400 hover:text-sand-100'
+              }`}
+            >
+              POL
+            </button>
           </div>
 
-          {/* Zones & Flow Motion Toggles */}
-          <div className="flex items-center space-x-1 bg-[#131518]/95 border border-zinc-800 px-2 py-1 rounded-md shadow-lg backdrop-blur text-xs font-mono">
-            <button
-              onClick={() => setShowZones(!showZones)}
-              className={`flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] transition cursor-pointer ${
-                showZones
-                  ? 'bg-zinc-800 text-white border border-zinc-700'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-              title="Toggle network perimeter zones"
-            >
-              <Layers className="w-2.5 h-2.5" />
-              <span className="hidden sm:inline">Zones</span>
-            </button>
-
-            <button
-              onClick={() => setAnimateFlow(!animateFlow)}
-              className={`flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] transition cursor-pointer ${
-                animateFlow
-                  ? 'bg-zinc-800 text-white border border-zinc-700'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-              title="Toggle fund motion animation"
-            >
-              {animateFlow ? <Pause className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
-              <span className="hidden sm:inline">Motion</span>
-            </button>
-
+          {/* Display Overlays: Splits, Amounts, Exit Path */}
+          <div className="h-[30px] hidden sm:flex items-center space-x-1 bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[4px] shadow-md">
             <button
               onClick={() => setShowPercentages(!showPercentages)}
-              className={`flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] transition cursor-pointer ${
-                showPercentages
-                  ? 'bg-zinc-800 text-white border border-zinc-700'
-                  : 'text-zinc-400 hover:text-white'
+              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
+                showPercentages ? 'bg-obsidian-850 text-sand-100' : 'text-zinc-500 hover:text-zinc-300'
               }`}
-              title="Toggle fund percentage splits"
+              title="Toggle split percentages"
             >
-              <Percent className="w-2.5 h-2.5" />
-              <span className="hidden sm:inline">Splits</span>
+              SPLITS
             </button>
-
             <button
               onClick={() => setShowEdgeLabels(!showEdgeLabels)}
-              className={`flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] transition cursor-pointer ${
-                showEdgeLabels
-                  ? 'bg-zinc-800 text-white border border-zinc-700'
-                  : 'text-zinc-400 hover:text-white'
+              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
+                showEdgeLabels ? 'bg-obsidian-850 text-sand-100' : 'text-zinc-500 hover:text-zinc-300'
               }`}
-              title="Toggle transaction amount labels"
+              title="Toggle amounts"
             >
-              <Eye className="w-2.5 h-2.5" />
-              <span className="hidden sm:inline">Amounts</span>
+              AMOUNTS
+            </button>
+            <button
+              onClick={() => setIsTracingPrimary(!isTracingPrimary)}
+              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer flex items-center space-x-1 ${
+                isTracingPrimary
+                  ? 'bg-sand-100 text-obsidian-950 font-bold'
+                  : 'text-zinc-400 hover:text-sand-100'
+              }`}
+              title="Trace primary exit path to exchange"
+            >
+              <Zap className="w-2.5 h-2.5" />
+              <span>EXIT PATH</span>
             </button>
           </div>
-
-          {/* Quick Flow Tracer Action */}
-          <button
-            onClick={() => setIsTracingPrimary(!isTracingPrimary)}
-            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold transition shadow-md backdrop-blur cursor-pointer ${
-              isTracingPrimary
-                ? 'bg-rose-500 text-white border border-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
-                : 'bg-[#181a1d] text-zinc-300 hover:text-white hover:bg-zinc-800 border border-zinc-700'
-            }`}
-            title="Highlight primary cash-out money laundering route"
-          >
-            <Zap className={`w-3 h-3 ${isTracingPrimary ? 'text-white' : 'text-amber-400'}`} />
-            <span>{isTracingPrimary ? 'Exit Path Active' : 'Trace Exit Path'}</span>
-          </button>
         </div>
 
-        {/* Right Cluster: Entity Jump + Canvas Controls */}
-        <div className="flex items-center space-x-2 pointer-events-auto">
-          {/* Quick Jump to Node Dropdown */}
+        {/* Right Cluster: Quick Entity Jump & Canvas Controls */}
+        <div className="flex items-center space-x-1.5 pointer-events-auto">
+          {/* Entity Focus Dropdown */}
           <div className="relative">
             <select
               value={selectedWalletId || ''}
               onChange={(e) => handleFocusEntity(e.target.value)}
-              className="bg-[#131518]/95 border border-zinc-800 text-zinc-300 hover:text-white px-2.5 py-1 rounded-md text-[10px] font-mono appearance-none cursor-pointer pr-6 shadow-lg backdrop-blur focus:outline-hidden focus:border-zinc-500"
+              className="h-[30px] bg-obsidian-900 border border-obsidian-750 text-sand-300 hover:text-sand-100 px-2 py-0.5 rounded-[4px] text-[10px] font-mono appearance-none cursor-pointer pr-5 shadow-md outline-none"
             >
-              <option value="">🎯 Focus Entity...</option>
+              <option value="">🎯 FOCUS ENTITY...</option>
               {Object.values(DEMO_WALLETS).map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.label} ({w.balance})
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-3 h-3 text-zinc-500 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-2.5 h-2.5 text-zinc-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
-          {/* Active AI Flow Isolation Pill */}
+          {/* AI Flow Highlight Notification & Clear */}
           {(highlightedNodeIds.length > 0 || highlightedEdgeIds.length > 0) && (
-            <div className="bg-[#181a1d] border border-white text-white px-2.5 py-1 rounded-md shadow-lg flex items-center space-x-2 text-xs font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-              <span className="font-bold text-[10px]">AI FLOW ISOLATED</span>
-              <span className="text-[9px] text-zinc-400">
-                ({highlightedEdgeIds.length} txs, {highlightedNodeIds.length} wallets)
-              </span>
+            <div className="h-[30px] bg-obsidian-900 border border-sand-300 text-sand-100 px-2.5 rounded-[4px] flex items-center space-x-1.5 shadow-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-sand-100 animate-pulse" />
+              <span className="text-[10px]">AI ISOLATION</span>
               {onClearHighlight && (
                 <button
                   onClick={onClearHighlight}
-                  className="ml-1 px-1.5 py-0.5 bg-zinc-800 hover:bg-white hover:text-black rounded text-[9px] text-white transition flex items-center space-x-1 cursor-pointer"
-                  title="Clear isolation and show full network"
+                  className="ml-1 p-0.5 hover:bg-obsidian-850 rounded text-zinc-400 hover:text-sand-100"
                 >
-                  <X className="w-2.5 h-2.5" />
-                  <span>CLEAR</span>
+                  <X className="w-3 h-3" />
                 </button>
               )}
             </div>
           )}
 
           {/* Canvas View Controls */}
-          <div className="flex items-center space-x-1 bg-[#131518]/95 border border-zinc-800 p-1 rounded-md shadow-lg backdrop-blur">
+          <div className="h-[30px] flex items-center space-x-0.5 bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[4px] shadow-md">
             <button
               onClick={handleFitView}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
-              title="Fit graph to view (Auto Scale)"
+              className="p-1 rounded-[2px] hover:bg-obsidian-850 text-zinc-400 hover:text-sand-100 transition cursor-pointer"
+              title="Fit graph to canvas"
             >
-              <Maximize2 className="w-3.5 h-3.5" />
+              <Maximize2 className="w-3 h-3" />
             </button>
             <button
               onClick={() => setShowMiniMap(!showMiniMap)}
-              className={`p-1 rounded transition cursor-pointer ${
-                showMiniMap
-                  ? 'bg-zinc-700 text-white'
-                  : 'hover:bg-zinc-800 text-zinc-400 hover:text-white'
+              className={`p-1 rounded-[2px] transition cursor-pointer ${
+                showMiniMap ? 'bg-obsidian-850 text-sand-100' : 'text-zinc-400 hover:text-sand-100'
               }`}
               title="Toggle MiniMap"
             >
-              <Map className="w-3.5 h-3.5" />
+              <Map className="w-3 h-3" />
             </button>
             <button
               onClick={handleReset}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
-              title="Reset all filters and view"
+              className="p-1 rounded-[2px] hover:bg-obsidian-850 text-zinc-400 hover:text-sand-100 transition cursor-pointer"
+              title="Reset graph view"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3 h-3" />
             </button>
             <button
               onClick={() => setShowLegend(!showLegend)}
-              className={`p-1 rounded transition cursor-pointer ${
-                showLegend ? 'bg-white text-black' : 'hover:bg-zinc-800 text-zinc-400 hover:text-white'
+              className={`p-1 rounded-[2px] transition cursor-pointer ${
+                showLegend ? 'bg-sand-100 text-obsidian-950' : 'text-zinc-400 hover:text-sand-100'
               }`}
               title="Toggle graph legend"
             >
-              <HelpCircle className="w-3.5 h-3.5" />
+              <HelpCircle className="w-3 h-3" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Collapsible Forensic Graph Legend */}
+      {/* Forensic Graph Legend — grayscale hierarchy */}
       {showLegend && (
-        <div className="absolute top-14 right-3 z-30 w-76 bg-[#121316]/95 border border-zinc-700/80 p-3.5 rounded-lg shadow-2xl backdrop-blur-md text-xs font-mono space-y-2.5 text-zinc-300">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-1.5">
-            <span className="text-white font-bold text-[11px] tracking-wider uppercase flex items-center space-x-1.5">
-              <Compass className="w-3.5 h-3.5 text-amber-400" />
-              <span>FORENSIC GRAPH GUIDE</span>
+        <div className="absolute top-12 right-3 z-30 w-64 bg-[#0C0C0C] border border-[#303030] p-3 rounded-[4px] shadow-2xl text-[10px] font-mono space-y-2 text-[#888888]">
+          <div className="flex items-center justify-between border-b border-[#202020] pb-1.5">
+            <span className="text-[#F5F5F5] font-bold uppercase tracking-wider">
+              ENTITY TYPE LEGEND
             </span>
-            <button
-              onClick={() => setShowLegend(false)}
-              className="text-zinc-500 hover:text-white cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
+            <button onClick={() => setShowLegend(false)} className="text-[#555555] hover:text-[#F5F5F5]">
+              <X className="w-3 h-3" />
             </button>
           </div>
 
           <div className="space-y-2 text-[10px]">
-            <div className="flex items-start space-x-2">
-              <span className="px-1.5 py-0.5 rounded bg-rose-950 border border-rose-500/50 text-rose-300 font-bold text-[8px] uppercase mt-0.5 shrink-0">
-                HUB
-              </span>
-              <span>
-                <strong className="text-white">Primary Suspect:</strong> Ingested $2,000 USDT from victim, split across 3 intermediary addresses in 24 seconds.
-              </span>
-            </div>
-
-            <div className="flex items-start space-x-2">
-              <span className="px-1.5 py-0.5 rounded bg-sky-950 border border-sky-500/50 text-sky-300 font-bold text-[8px] uppercase mt-0.5 shrink-0">
-                COMPL
-              </span>
-              <span>
-                <strong className="text-white">Reporting Victim:</strong> Defrauded source entity who reported phishing engagement.
-              </span>
-            </div>
-
-            <div className="flex items-start space-x-2">
-              <span className="px-1.5 py-0.5 rounded bg-amber-950 border border-amber-500/50 text-amber-300 font-bold text-[8px] uppercase mt-0.5 shrink-0">
-                BRIDGE
-              </span>
-              <span>
-                <strong className="text-white">Bridge Gateway:</strong> Smart contract protocol lock-and-mint transfer from Ethereum to Polygon POS.
-              </span>
-            </div>
-
-            <div className="flex items-start space-x-2">
-              <span className="px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-300 font-bold text-[8px] uppercase mt-0.5 shrink-0">
-                CEX
-              </span>
-              <span>
-                <strong className="text-white">Exchange Deposit:</strong> Centralized exchange hotwallet representing subpoena and KYC target.
-              </span>
-            </div>
-
-            <div className="flex items-start space-x-2">
-              <span className="px-1.5 py-0.5 rounded bg-purple-950 border border-purple-500/50 text-purple-300 font-bold text-[8px] uppercase mt-0.5 shrink-0">
-                COLD
-              </span>
-              <span>
-                <strong className="text-white">Parking Wallet:</strong> Static $500 balance remaining dormant without downstream hops.
-              </span>
-            </div>
+            {[
+              { label: 'PRIMARY SUSPECT',   size: 14, ring: '#F5F5F5', desc: 'Largest node · solid white ring' },
+              { label: 'VICTIM INGRESS',     size: 12, ring: '#CCCCCC', desc: 'Medium · light gray ring' },
+              { label: 'VASP / EXCHANGE',    size: 11, ring: '#AAAAAA', desc: 'Medium · gray ring' },
+              { label: 'CROSS-CHAIN BRIDGE', size: 10, ring: '#777777', desc: 'Small · dashed gray ring' },
+              { label: 'INTERMEDIARY',       size: 9,  ring: '#555555', desc: 'Smallest · dark ring' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center space-x-2">
+                <div
+                  className="rounded-full shrink-0 flex items-center justify-center"
+                  style={{ width: item.size + 4, height: item.size + 4, border: `1.5px solid ${item.ring}`, background: '#101010' }}
+                >
+                  <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#FFFFFF', opacity: 0.5 }} />
+                </div>
+                <div>
+                  <div className="text-[#DDDDDD] font-medium">{item.label}</div>
+                  <div className="text-[#444444] text-[9px]">{item.desc}</div>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="pt-2 border-t border-zinc-800 text-[9px] text-zinc-500 flex justify-between">
-            <span>• Hover edge: Inspect transaction hash</span>
-            <span>• Click node: Open intelligence drawer</span>
+          <div className="pt-1.5 border-t border-[#202020] text-[9px] text-[#444444]">
+            Click any node to focus its subgraph. Hierarchy by size + ring brightness.
           </div>
         </div>
       )}
-
-      {/* React Flow Viewport */}
-      <div className="w-full h-full" style={{ width: '100%', height: '100%', minHeight: '500px' }}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodeClick={handleNodeClick}
-          onEdgeClick={handleEdgeClick}
-          onPaneClick={() => onSelectWallet(null)}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.12 }}
-          minZoom={0.15}
-          maxZoom={2.0}
-          proOptions={{ hideAttribution: true }}
-        >
-          {/* Tactical Background Grid */}
-          <Background
-            variant={BackgroundVariant.Dots}
-            gap={24}
-            size={1.2}
-            color="#22252a"
-          />
-
-          {/* Bottom-Right Navigation Controls */}
-          <Controls
-            position="bottom-right"
-            className="!bg-[#14161a] !border-zinc-800 !shadow-xl"
-            showInteractive={false}
-          />
-
-          {/* Toggleable MiniMap positioned cleanly above controls */}
-          {showMiniMap && (
-            <MiniMap
-              position="bottom-right"
-              nodeColor={(n) => {
-                if (n.type === 'networkZone') return 'transparent';
-                const data = n.data as any;
-                if (data.entityType === 'suspect') return '#f43f5e';
-                if (data.entityType === 'victim') return '#38bdf8';
-                if (data.entityType === 'bridge') return '#fbbf24';
-                if (data.entityType === 'exchange') return '#34d399';
-                if (data.id === 'walletD') return '#c084fc';
-                return '#64748b';
-              }}
-              nodeStrokeColor="#181818"
-              nodeStrokeWidth={1}
-              nodeBorderRadius={3}
-              maskColor="rgba(8, 8, 10, 0.85)"
-              className="!w-40 !h-28 !bg-[#101114]/95 !border !border-zinc-800 !rounded-lg hidden md:block shadow-2xl !mb-14 !mr-2 backdrop-blur-md"
-            />
-          )}
-        </ReactFlow>
-      </div>
     </div>
   );
 };

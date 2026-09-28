@@ -1,12 +1,13 @@
 @import '@xyflow/react/dist/style.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #050505;
+  --foreground: #F5F5F5;
 }
 
 html,
@@ -17,109 +18,168 @@ body {
   padding: 0;
   color: var(--foreground);
   background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Minimal Scrollbar */
+/* Technical Font Utilities */
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+/* Custom Minimal Forensic Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #050505;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #242424;
+  background: #2A2A2A;
   border-radius: 2px;
+  transition: background 0.15s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3e3e3e;
+  background: #3A3A3A;
 }
 
-/* React Flow Styling strictly monochrome */
+/* Obsidian Knowledge Graph Dot Grid */
+.bg-obsidian-dot-grid {
+  background-color: #050505;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Subtle Technical Hairline Dividers & Panels */
+.forensic-panel {
+  background: #111111;
+  border: 1px solid #2A2A2A;
+  border-radius: 6px;
+}
+
+.forensic-card {
+  background: #111111;
+  border: 1px solid #2A2A2A;
+  border-radius: 6px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.forensic-card:hover {
+  border-color: #3A3A3A;
+}
+
+/* Compatibility classes aligned to monochrome */
+.glass-panel {
+  background: #111111;
+  border: 1px solid #2A2A2A;
+  border-radius: 6px;
+}
+
+.glass-card {
+  background: #111111;
+  border: 1px solid #2A2A2A;
+  border-radius: 6px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.glass-card:hover {
+  background: #181818;
+  border-color: #3A3A3A;
+}
+
+/* Text styles without rainbow gradients */
+.text-sand-bright {
+  color: #F5F5F5;
+}
+
+.text-sand-muted {
+  color: #A3A3A3;
+}
+
+.text-zinc-subtle {
+  color: #888888;
+}
+
+.text-gradient-cyan,
+.text-gradient-silver {
+  color: #F5F5F5;
+  background: none;
+  -webkit-text-fill-color: initial;
+}
+
+/* Neutral backdrop replacement for legacy radial atmosphere */
+.bg-radial-atmosphere,
+.bg-cyber-grid {
+  background-color: #050505;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* React Flow Canvas in Obsidian Forensic Mode */
 .react-flow__pane {
   cursor: grab;
-  background-color: #0c0c0c !important;
+  background-color: #050505 !important;
 }
 
 .react-flow__controls {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6) !important;
-  border: 1px solid #242424 !important;
-  background: #141414 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid #2A2A2A !important;
+  background: #111111 !important;
   border-radius: 4px !important;
 }
 
 .react-flow__controls-button {
-  background: #141414 !important;
-  border-bottom: 1px solid #242424 !important;
-  color: #888888 !important;
-  fill: #888888 !important;
+  background: #111111 !important;
+  border-bottom: 1px solid #2A2A2A !important;
+  color: #A3A3A3 !important;
+  fill: #A3A3A3 !important;
 }
 
 .react-flow__controls-button:hover {
-  background: #242424 !important;
-  color: #ffffff !important;
-  fill: #ffffff !important;
+  background: #181818 !important;
+  color: #F5F5F5 !important;
+  fill: #F5F5F5 !important;
 }
 
 .react-flow__minimap {
-  background-color: #0e0e0e !important;
-  border: 1px solid #262626 !important;
+  background-color: #050505 !important;
+  border: 1px solid #2A2A2A !important;
   border-radius: 4px !important;
 }
 
-.react-flow__minimap-mask {
-  fill: rgba(255, 255, 255, 0.06) !important;
-  stroke: #555555 !important;
-  stroke-width: 1 !important;
+/* Connected Subgraph Focus & Dimming physics */
+.graph-dimmed {
+  opacity: 0.15 !important;
+  filter: grayscale(0.85);
+  transition: opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Edge Fund Movement Subtle Dash Animation */
-@keyframes flowDash {
-  to {
-    stroke-dashoffset: -16;
-  }
+.graph-focused {
+  opacity: 1 !important;
+  transition: opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.animated-flow-edge path,
-.animated-flow-dash {
-  animation: flowDash 1.4s linear infinite;
-}
-
-/* Print Stylesheet for Formal Case Dossier */
+/* Printable Sections & Clean Legal Report styling */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 8mm 10mm 10mm 10mm;
+    margin: 12mm 15mm 15mm 15mm;
   }
 
-  html,
   body {
     background: #ffffff !important;
     color: #111111 !important;
-    font-size: 9pt !important;
-    line-height: 1.35 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    overflow: visible !important;
-    height: auto !important;
-    width: 100% !important;
   }
 
-  /* Hide entire application shell and background UI */
-  .no-print,
-  nav,
-  header,
-  aside,
-  main,
-  button,
-  .react-flow,
-  .print-hidden {
+  .no-print {
     display: none !important;
   }
 
@@ -127,42 +187,25 @@ body {
     display: block !important;
   }
 
-  /* Printable Container & Sheets */
-  .report-printable-container {
-    position: static !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    background: #ffffff !important;
-    color: #111111 !important;
-    box-shadow: none !important;
-    border: none !important;
-    border-radius: 0 !important;
-    overflow: visible !important;
-  }
-
   .print-sheet {
     box-shadow: none !important;
     border: none !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
     padding: 0 !important;
-    width: 100% !important;
+    margin: 0 !important;
     max-width: 100% !important;
+    width: 100% !important;
     background: #ffffff !important;
     color: #111111 !important;
   }
 
-  .print-avoid-break {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
+  .print-page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+    margin-top: 0 !important;
   }
 
-  .print-page-break {
-    break-after: page !important;
-    page-break-after: always !important;
-    height: 0 !important;
-    display: block !important;
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
