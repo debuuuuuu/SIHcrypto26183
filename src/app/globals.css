@@ -165,6 +165,20 @@ body {
   transition: opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Animated edge flow (marching ants) */
+@keyframes flow-dash {
+  from {
+    stroke-dashoffset: 20;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animated-flow-dash {
+  animation: flow-dash 1s linear infinite;
+}
+
 /* Printable Sections & Clean Legal Report styling */
 @media print {
   @page {

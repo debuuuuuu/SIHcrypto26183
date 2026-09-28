@@ -4,6 +4,7 @@ import React, { memo, useState } from 'react';
 import {
   EdgeProps,
   getBezierPath,
+  getSmoothStepPath,
   EdgeLabelRenderer,
   BaseEdge,
 } from '@xyflow/react';
@@ -44,32 +45,40 @@ export const ForensicEdge = memo((props: EdgeProps) => {
   const showLabels = edgeData.showLabels !== false;
   const showPercentages = Boolean(edgeData.showPercentages);
   const animateFlow = edgeData.animateFlow !== false;
-  const isHorizontal = edgeData.layout === 'horizontal';
+  const isFlow = edgeData.layout === 'flow';
 
-  // Calculate smooth curved path
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-    curvature: isHorizontal ? 0.35 : 0.25,
-  });
+  let edgePath, labelX, labelY;
+  
+  if (isFlow) {
+    const [path, x, y] = getSmoothStepPath({
+      sourceX,
+      sourceY,
+      sourcePosition,
+      targetX,
+      targetY,
+      targetPosition,
+      borderRadius: 16,
+    });
+    edgePath = path;
+    labelX = x;
+    labelY = y;
+  } else {
+    const [path, x, y] = getBezierPath({
+      sourceX,
+      sourceY,
+      sourcePosition,
+      targetX,
+      targetY,
+      targetPosition,
+      curvature: 0.25,
+    });
+    edgePath = path;
+    labelX = x;
+    labelY = y;
+  }
 
-  // Staggered label placement in vertical mode to avoid collisions
   let computedLabelX = labelX;
   let computedLabelY = labelY;
-
-  if (edgeData.layout === 'vertical') {
-    if (id === 'TX-DEMO-002') {
-      computedLabelY = labelY - 18;
-    } else if (id === 'TX-DEMO-003') {
-      computedLabelY = labelY + 22;
-    } else if (id === 'TX-DEMO-004') {
-      computedLabelY = labelY - 18;
-    }
-  }
 
   // Section 27: Stroke styling rules
   const strokeColor = isHighlighted
