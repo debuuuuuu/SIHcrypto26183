@@ -1,0 +1,14 @@
+# Development and test scripts
+scripts/
+tests/
+
+# Local env files
+.env*.local
+.env
+
+# Build artifacts
+.next/
+out/
+build/
+node_modules/
+*.tsbuildinfo
