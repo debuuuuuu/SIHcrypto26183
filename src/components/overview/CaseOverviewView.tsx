@@ -559,8 +559,129 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
           </div>
         </div>
 
+        {/* =================================================================== */}
+        {/* ROW 3: Network Consensus + Risk Decomposition + Jurisdiction */}
+        {/* =================================================================== */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 opacity-0 animate-fade-in-up-delay-3">
+          {/* Card 4: Network Consensus Health */}
+          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
+            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
+                04 // NETWORK TELEMETRY
+              </span>
+              <span className="text-[10px] font-mono text-sand-100 flex items-center space-x-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-sand-100 animate-pulse" />
+                <span>SYNCED</span>
+              </span>
+            </div>
+
+            <div className="space-y-3 font-mono text-xs pt-1">
+              <div className="flex justify-between items-center border-b border-obsidian-800 pb-1.5">
+                <span className="text-zinc-500">L1 Base Fee</span>
+                <span className="text-sand-100 font-bold"><NumberTicker value={14} suffix=" Gwei" /></span>
+              </div>
+              <div className="flex justify-between items-center border-b border-obsidian-800 pb-1.5">
+                <span className="text-zinc-500">Avg Confirmation</span>
+                <span className="text-sand-100 font-bold"><NumberTicker value={12.4} isDecimal suffix="s" /></span>
+              </div>
+              <div className="flex justify-between items-center border-b border-obsidian-800 pb-1.5">
+                <span className="text-zinc-500">Contract Calls</span>
+                <span className="text-sand-100 font-bold"><NumberTicker value={342} /> calls/min</span>
+              </div>
+              <div className="flex justify-between items-center pb-1">
+                <span className="text-zinc-500">MEV Exposure</span>
+                <span className="text-sand-100 font-bold">HIGH (Front-run)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 5: Risk Assessment Decomposition */}
+          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
+            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
+                05 // RISK DECOMPOSITION
+              </span>
+              <span className="text-[10px] font-mono text-sand-100 font-bold bg-obsidian-850 px-1.5 py-0.5 rounded-[4px] border border-obsidian-750">
+                SCORE: 94
+              </span>
+            </div>
+
+            <div className="space-y-3 font-mono text-xs pt-1">
+              <div className="flex flex-col space-y-1">
+                <div className="flex justify-between text-[10px]">
+                  <span className="text-zinc-400">Tornado Cash Exposure</span>
+                  <span className="text-sand-100 font-bold">+45 pts</span>
+                </div>
+                <div className="w-full bg-obsidian-950 h-1 rounded-full overflow-hidden">
+                  <div className="bg-sand-100 h-full" style={{ width: '45%' }}></div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col space-y-1">
+                <div className="flex justify-between text-[10px]">
+                  <span className="text-zinc-400">High-Velocity Structuring</span>
+                  <span className="text-sand-100 font-bold">+28 pts</span>
+                </div>
+                <div className="w-full bg-obsidian-950 h-1 rounded-full overflow-hidden">
+                  <div className="bg-sand-300 h-full" style={{ width: '28%' }}></div>
+                </div>
+              </div>
+
+              <div className="flex flex-col space-y-1">
+                <div className="flex justify-between text-[10px]">
+                  <span className="text-zinc-400">OFAC Sanctioned Counterparty</span>
+                  <span className="text-sand-100 font-bold">+21 pts</span>
+                </div>
+                <div className="w-full bg-obsidian-950 h-1 rounded-full overflow-hidden">
+                  <div className="bg-zinc-500 h-full" style={{ width: '21%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 6: Jurisdiction Mapping */}
+          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
+            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
+                06 // JURISDICTION MAPPING
+              </span>
+              <span className="text-[10px] font-mono text-zinc-500">3 REGIONS</span>
+            </div>
+
+            <div className="space-y-2 font-mono text-xs pt-1">
+              <div className="p-2 border border-obsidian-750 rounded-[4px] bg-obsidian-950 flex justify-between items-center">
+                <div>
+                  <span className="text-sand-100 font-bold block text-[11px]">Seychelles (SC)</span>
+                  <span className="text-[9px] text-zinc-500">CEX Headquarters</span>
+                </div>
+                <span className="text-[10px] bg-obsidian-850 px-1.5 py-0.5 rounded-[2px] text-sand-300 border border-obsidian-750">
+                  MLAT req.
+                </span>
+              </div>
+              <div className="p-2 border border-obsidian-750 rounded-[4px] bg-obsidian-950 flex justify-between items-center">
+                <div>
+                  <span className="text-sand-100 font-bold block text-[11px]">British Virgin Islands (VG)</span>
+                  <span className="text-[9px] text-zinc-500">Bridge Operator</span>
+                </div>
+                <span className="text-[10px] bg-obsidian-850 px-1.5 py-0.5 rounded-[2px] text-sand-300 border border-obsidian-750">
+                  Subpoena
+                </span>
+              </div>
+              <div className="p-2 border border-obsidian-750 rounded-[4px] bg-obsidian-950 flex justify-between items-center">
+                <div>
+                  <span className="text-sand-100 font-bold block text-[11px]">United States (US)</span>
+                  <span className="text-[9px] text-zinc-500">Node Hosting</span>
+                </div>
+                <span className="text-[10px] bg-obsidian-850 px-1.5 py-0.5 rounded-[2px] text-sand-300 border border-obsidian-750">
+                  Direct
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Quick Fast Jump Actions */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 opacity-0 animate-fade-in-up-delay-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 opacity-0 animate-fade-in-up-delay-4">
           <button
             onClick={() => onNavigate('graph')}
             className="p-3 bg-obsidian-900 hover:bg-obsidian-850 border border-obsidian-750 hover:border-sand-300 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer"

@@ -118,6 +118,7 @@ const config: Config = {
         'fade-in-up-delay-1': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards',
         'fade-in-up-delay-2': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards',
         'fade-in-up-delay-3': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards',
+        'fade-in-up-delay-4': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards',
         'pulse-radar': 'pulseRadar 2s infinite',
         'sweep': 'sweep 2.5s infinite',
       },
