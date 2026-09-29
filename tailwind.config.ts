@@ -112,6 +112,20 @@ const config: Config = {
           '50%': { opacity: '0.1' },
           '100%': { transform: 'translateX(200%) skewX(-15deg)', opacity: '0' },
         },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        pulseSlow: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.4' },
+        },
+        blob: {
+          '0%': { transform: 'translate(0px, 0px) scale(1)' },
+          '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+          '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+          '100%': { transform: 'translate(0px, 0px) scale(1)' },
+        },
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards',
@@ -121,6 +135,9 @@ const config: Config = {
         'fade-in-up-delay-4': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards',
         'pulse-radar': 'pulseRadar 2s infinite',
         'sweep': 'sweep 2.5s infinite',
+        'shimmer': 'shimmer 2s infinite',
+        'pulse-slow': 'pulseSlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'blob': 'blob 10s infinite',
       },
     },
   },

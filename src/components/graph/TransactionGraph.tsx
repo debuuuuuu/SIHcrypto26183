@@ -3,7 +3,6 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import {
   ReactFlow,
-  Controls,
   MiniMap,
   Background,
   BackgroundVariant,
@@ -25,20 +24,17 @@ import {
   DEMO_DETECTIONS,
 } from '@/data/demoInvestigation';
 import {
-  Filter,
-  Eye,
-  Percent,
-  Play,
-  Pause,
   Maximize2,
   RotateCcw,
   Zap,
   HelpCircle,
   X,
   ChevronDown,
-  Layers,
   Map,
-  Compass,
+  Play,
+  Pause,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 
 interface TransactionGraphProps {
@@ -92,31 +88,106 @@ const PRIMARY_LAUNDERING_EDGES = [
   'TX-DEMO-008',
 ];
 
-// Flow layout: Linear progression from L1 ingress to L2 liquidation
+// Flow layout: Generous spacing with 180-200px horizontal gaps and 90px vertical gaps (ZERO overlapping)
 const FLOW_COORDS: Record<string, { x: number; y: number }> = {
-  victim: { x: 80, y: 320 },
-  suspect: { x: 380, y: 320 },
-  walletB: { x: 740, y: 120 },
-  walletC: { x: 740, y: 320 },
-  walletD: { x: 740, y: 520 },
-  downstreamDest: { x: 1080, y: 120 },
-  bridge: { x: 1080, y: 320 },
-  polygonWallet: { x: 1420, y: 320 },
-  exchange: { x: 1780, y: 320 },
+  victim:         { x: 80,   y: 470 }, // Column 1: Ingress (y: 470)
+  suspect:        { x: 530,  y: 470 }, // Column 2: Target Hub (gap = 180px)
+  walletB:        { x: 1000, y: 140 }, // Column 3: Top Relay (gap = 200px, 90px clear vertical gap from C)
+  walletC:        { x: 1000, y: 470 }, // Column 3: Middle Bridge Feeder
+  walletD:        { x: 1000, y: 800 }, // Column 3: Bottom Parking (90px clear vertical gap from C)
+  downstreamDest: { x: 1470, y: 140 }, // Column 4: Top Downstream Hop (gap = 200px)
+  bridge:         { x: 1470, y: 470 }, // Column 4: Middle Bridge Protocol Gateway
+  polygonWallet:  { x: 1940, y: 470 }, // Column 5: Polygon L2 Transit (cross-chain gap = 200px)
+  exchange:       { x: 2400, y: 470 }, // Column 6: CEX Off-Ramp Endpoint (gap = 190px)
 };
 
-// Orbital layout (Section 22): Concentric circular topology around Suspect hub
+// Orbital layout: Concentric circular topology around Suspect hub
 const ORBITAL_COORDS: Record<string, { x: number; y: number }> = {
-  suspect: { x: 700, y: 400 }, // Center Hub
-  victim: { x: 700, y: 720 },  // South Ingress
-  walletB: { x: 380, y: 260 }, // North-West
-  walletC: { x: 700, y: 120 }, // North Bridge Feeder
-  walletD: { x: 1020, y: 260 }, // North-East Cold Parking
-  downstreamDest: { x: 140, y: 160 }, // West Terminus
-  bridge: { x: 550, y: -60 }, // North-West Bridge
-  polygonWallet: { x: 850, y: -60 }, // North-East Polygon
-  exchange: { x: 1150, y: -60 }, // Far North-East CEX Outflow
+  suspect:        { x: 700, y: 400 },
+  victim:         { x: 700, y: 720 },
+  walletB:        { x: 380, y: 240 },
+  walletC:        { x: 700, y: 100 },
+  walletD:        { x: 1020, y: 240 },
+  downstreamDest: { x: 120, y: 140 },
+  bridge:         { x: 520, y: -80 },
+  polygonWallet:  { x: 850, y: -80 },
+  exchange:       { x: 1180, y: -80 },
 };
+
+// Progressive chronological reconstruction steps (block by block)
+export interface ReconstructionStep {
+  step: number;
+  label: string;
+  subtitle: string;
+  time: string;
+  description: string;
+  nodeIds: string[];
+  edgeIds: string[];
+  zoneIds: string[];
+}
+
+export const RECONSTRUCTION_STEPS: ReconstructionStep[] = [
+  {
+    step: 0,
+    label: 'INFLOW',
+    subtitle: 'Victim Ingestion',
+    time: '10:31:04 UTC',
+    description: 'Victim wallet reports unauthorized fraudulent transfer of $2,000 USDT',
+    nodeIds: ['victim'],
+    edgeIds: [],
+    zoneIds: ['zone-eth'],
+  },
+  {
+    step: 1,
+    label: 'TARGET HUB',
+    subtitle: 'Suspect Materialization',
+    time: '10:31:04 UTC',
+    description: '100% of illicit proceeds ($2,000 USDT) ingested into central Suspect Hub',
+    nodeIds: ['victim', 'suspect'],
+    edgeIds: ['TX-DEMO-001'],
+    zoneIds: ['zone-eth'],
+  },
+  {
+    step: 2,
+    label: 'RAPID FAN-OUT',
+    subtitle: 'Automated Dispersal',
+    time: '10:33:17 UTC',
+    description: 'Suspect splits funds across Wallets B ($800), C ($700), D ($500) within 24s',
+    nodeIds: ['victim', 'suspect', 'walletB', 'walletC', 'walletD'],
+    edgeIds: ['TX-DEMO-001', 'TX-DEMO-002', 'TX-DEMO-003', 'TX-DEMO-004'],
+    zoneIds: ['zone-eth'],
+  },
+  {
+    step: 3,
+    label: 'LAYERING',
+    subtitle: 'Secondary Transit & Bridge Feed',
+    time: '10:35:02 UTC',
+    description: 'Wallet B forwards $760 onward; Wallet C feeds $700 into Cross-Chain Gateway',
+    nodeIds: ['victim', 'suspect', 'walletB', 'walletC', 'walletD', 'downstreamDest', 'bridge'],
+    edgeIds: ['TX-DEMO-001', 'TX-DEMO-002', 'TX-DEMO-003', 'TX-DEMO-004', 'TX-DEMO-005', 'TX-DEMO-007'],
+    zoneIds: ['zone-eth'],
+  },
+  {
+    step: 4,
+    label: 'BRIDGE LEAP',
+    subtitle: 'Cross-Chain Transfer to L2',
+    time: '10:36:11 UTC',
+    description: 'Bridge protocol executes cross-chain lock & mint, moving $698 net to Polygon L2',
+    nodeIds: ['victim', 'suspect', 'walletB', 'walletC', 'walletD', 'downstreamDest', 'bridge', 'polygonWallet'],
+    edgeIds: ['TX-DEMO-001', 'TX-DEMO-002', 'TX-DEMO-003', 'TX-DEMO-004', 'TX-DEMO-005', 'TX-DEMO-007', 'TX-DEMO-006'],
+    zoneIds: ['zone-eth', 'zone-poly'],
+  },
+  {
+    step: 5,
+    label: 'CEX OFF-RAMP',
+    subtitle: 'Liquidation Point Terminus',
+    time: '10:41:52 UTC',
+    description: 'Polygon transit wallet executes deposit of $680 USDT to Centralized Exchange hotwallet',
+    nodeIds: ['victim', 'suspect', 'walletB', 'walletC', 'walletD', 'downstreamDest', 'bridge', 'polygonWallet', 'exchange'],
+    edgeIds: ['TX-DEMO-001', 'TX-DEMO-002', 'TX-DEMO-003', 'TX-DEMO-004', 'TX-DEMO-005', 'TX-DEMO-007', 'TX-DEMO-006', 'TX-DEMO-008'],
+    zoneIds: ['zone-eth', 'zone-poly'],
+  },
+];
 
 const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
   selectedWalletId,
@@ -130,7 +201,7 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
 }) => {
   const { fitView, setCenter } = useReactFlow();
 
-  // Section 22: Graph Modes: 'flow' or 'orbital'
+  // Graph Modes: 'flow' or 'orbital'
   const [graphMode, setGraphMode] = useState<'flow' | 'orbital'>('flow');
   const [chainFilter, setChainFilter] = useState<'all' | 'Ethereum' | 'Polygon'>('all');
   const [showZones, setShowZones] = useState(true);
@@ -140,6 +211,12 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
   const [animateFlow, setAnimateFlow] = useState(true);
   const [isTracingPrimary, setIsTracingPrimary] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
+
+  // Progressive block-by-block manifestation states
+  const [isReconstructionActive, setIsReconstructionActive] = useState<boolean>(true);
+  const [reconstructionStep, setReconstructionStep] = useState<number>(0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
 
   // Active detection
   const activeDetection = useMemo(() => {
@@ -154,7 +231,51 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     return () => clearTimeout(timer);
   }, [fitView, graphMode]);
 
-  // Network Zones for Flow & Orbital
+  // Automated Sequential Block Manifestation (Advances block by block)
+  useEffect(() => {
+    if (!isReconstructionActive || !isPlaying) return;
+
+    if (reconstructionStep >= RECONSTRUCTION_STEPS.length - 1) {
+      setIsPlaying(false);
+      return;
+    }
+
+    const interval = Math.round(950 / playbackSpeed);
+    const timer = setTimeout(() => {
+      setReconstructionStep((prev) => prev + 1);
+    }, interval);
+
+    return () => clearTimeout(timer);
+  }, [isReconstructionActive, isPlaying, reconstructionStep, playbackSpeed]);
+
+  // Smooth Camera Guidance during progressive reconstruction
+  useEffect(() => {
+    if (!isReconstructionActive || graphMode !== 'flow') return;
+
+    const cameraTargets: Record<number, { x: number; y: number; zoom: number }> = {
+      0: { x: 300, y: 550, zoom: 0.95 },
+      1: { x: 450, y: 550, zoom: 0.9 },
+      2: { x: 800, y: 570, zoom: 0.78 },
+      3: { x: 1100, y: 570, zoom: 0.7 },
+      4: { x: 1500, y: 570, zoom: 0.62 },
+      5: { x: 1350, y: 570, zoom: 0.55 },
+    };
+
+    const target = cameraTargets[reconstructionStep];
+    if (target) {
+      setCenter(target.x, target.y, { duration: 750, zoom: target.zoom });
+    }
+  }, [reconstructionStep, isReconstructionActive, graphMode, setCenter]);
+
+  // Current step config
+  const currentStepConfig = useMemo(() => {
+    if (!isReconstructionActive) {
+      return RECONSTRUCTION_STEPS[RECONSTRUCTION_STEPS.length - 1];
+    }
+    return RECONSTRUCTION_STEPS[reconstructionStep] || RECONSTRUCTION_STEPS[0];
+  }, [isReconstructionActive, reconstructionStep]);
+
+  // Network Zones for Flow & Orbital (modeled after "Static models" in reference image)
   const zoneNodes: Node[] = useMemo(() => {
     if (!showZones) return [];
 
@@ -172,18 +293,19 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
       ];
     }
 
-    return [
+    // Generously proportioned group zones with ample internal padding
+    const allZones = [
       {
         id: 'zone-eth',
         type: 'networkZone',
-        position: { x: 30, y: 40 },
+        position: { x: 30, y: 70 },
         data: {
           id: 'zone-eth',
           title: 'ETHEREUM MAINNET (L1)',
-          subtitle: '7 ENTITIES • $2,000 USDT INGRESS & LAYERING',
+          subtitle: '7 ENTITIES • $2,000 USDT INGRESS & LAYERING LAYER',
           chain: 'Ethereum',
-          width: 1300,
-          height: 600,
+          width: 1760,
+          height: 1060,
         },
         draggable: false,
         selectable: false,
@@ -192,23 +314,30 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
       {
         id: 'zone-poly',
         type: 'networkZone',
-        position: { x: 1370, y: 220 },
+        position: { x: 1890, y: 360 },
         data: {
           id: 'zone-poly',
           title: 'POLYGON POS (L2)',
           subtitle: '2 ENTITIES • $680 USDT OFF-RAMP TERMINUS',
           chain: 'Polygon',
-          width: 530,
-          height: 250,
+          width: 830,
+          height: 440,
         },
         draggable: false,
         selectable: false,
         zIndex: -1,
       },
     ];
-  }, [showZones, graphMode]);
 
-  // Section 26: Connected Entity Discovery for Focus/Dimming
+    // Filter zones based on active reconstruction step
+    if (isReconstructionActive) {
+      return allZones.filter((z) => currentStepConfig.zoneIds.includes(z.id));
+    }
+
+    return allZones;
+  }, [showZones, graphMode, isReconstructionActive, currentStepConfig]);
+
+  // Connected Entity Discovery for Focus/Dimming
   const connectedWalletIds = useMemo(() => {
     if (!selectedWalletId) return new Set<string>();
     const connected = new Set<string>([selectedWalletId]);
@@ -219,47 +348,70 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     return connected;
   }, [selectedWalletId]);
 
-  // Transform raw DEMO_WALLETS into React Flow Nodes
+  // Transform raw DEMO_WALLETS into React Flow Nodes (filtered by progressive step + staggerIndex)
   const initialNodes: Node[] = useMemo(() => {
     const coordsMap = graphMode === 'orbital' ? ORBITAL_COORDS : FLOW_COORDS;
-    const hasFocusFilter = Boolean(selectedWalletId) || Boolean(activeDetection) || highlightedNodeIds.length > 0 || isTracingPrimary || chainFilter !== 'all';
 
-    const entityNodes: Node[] = Object.values(DEMO_WALLETS).map((wallet) => {
-      const isSelected = selectedWalletId === wallet.id;
-      const isConnected = connectedWalletIds.has(wallet.id);
-      const isDetectionAffected = activeDetection
-        ? activeDetection.affectedNodes.includes(wallet.id)
-        : false;
-      const isExternalHighlighted = highlightedNodeIds.includes(wallet.id);
-      const isPrimaryTraced = isTracingPrimary && PRIMARY_LAUNDERING_NODES.includes(wallet.id);
+    // Explicit filter mode active (only dim when specific query or trace is active)
+    const isExplicitFilterActive =
+      Boolean(activeDetection) ||
+      highlightedNodeIds.length > 0 ||
+      isTracingPrimary ||
+      chainFilter !== 'all';
 
-      const isFocused =
-        isSelected ||
-        isConnected ||
-        isDetectionAffected ||
-        isExternalHighlighted ||
-        isPrimaryTraced;
+    const entityNodes: Node[] = Object.values(DEMO_WALLETS)
+      .filter((wallet) => {
+        // If sequential reconstruction is active, only show nodes revealed up to this step
+        if (isReconstructionActive) {
+          return currentStepConfig.nodeIds.includes(wallet.id);
+        }
+        return true;
+      })
+      .map((wallet) => {
+        const isSelected = selectedWalletId === wallet.id;
+        const isConnected = connectedWalletIds.has(wallet.id);
+        const isDetectionAffected = activeDetection
+          ? activeDetection.affectedNodes.includes(wallet.id)
+          : false;
+        const isExternalHighlighted = highlightedNodeIds.includes(wallet.id);
+        const isPrimaryTraced = isTracingPrimary && PRIMARY_LAUNDERING_NODES.includes(wallet.id);
 
-      // Filter by chain if active
-      const matchesChainFilter =
-        chainFilter === 'all' || wallet.chain.toLowerCase() === chainFilter.toLowerCase();
+        const isFocused =
+          isSelected ||
+          isConnected ||
+          isDetectionAffected ||
+          isExternalHighlighted ||
+          isPrimaryTraced;
 
-      // Section 26: Dimming rule
-      const isDimmed = (hasFocusFilter && !isFocused) || !matchesChainFilter;
+        // Filter by chain if active
+        const matchesChainFilter =
+          chainFilter === 'all' || wallet.chain.toLowerCase() === chainFilter.toLowerCase();
 
-      return {
-        id: wallet.id,
-        type: 'forensicNode',
-        position: coordsMap[wallet.id] || wallet.position,
-        data: {
-          ...wallet,
-          layout: graphMode,
-          isSelected,
-          isHighlighted: isFocused,
-          isDimmed,
-        },
-      };
-    });
+        // Non-focused nodes are dimmed only when an explicit filter/trace is active
+        const isDimmed = isExplicitFilterActive ? !isFocused : !matchesChainFilter;
+
+        // Stagger index for smooth cascade within multi-node steps
+        let staggerIndex = 0;
+        if (wallet.id === 'walletB') staggerIndex = 0;
+        if (wallet.id === 'walletC') staggerIndex = 1;
+        if (wallet.id === 'walletD') staggerIndex = 2;
+        if (wallet.id === 'downstreamDest') staggerIndex = 0;
+        if (wallet.id === 'bridge') staggerIndex = 1;
+
+        return {
+          id: wallet.id,
+          type: 'forensicNode',
+          position: coordsMap[wallet.id] || wallet.position,
+          data: {
+            ...wallet,
+            layout: graphMode,
+            staggerIndex,
+            isSelected,
+            isHighlighted: isFocused,
+            isDimmed,
+          },
+        };
+      });
 
     return [...zoneNodes, ...entityNodes];
   }, [
@@ -271,19 +423,33 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     isTracingPrimary,
     graphMode,
     zoneNodes,
+    isReconstructionActive,
+    currentStepConfig,
   ]);
 
-  // Transform raw DEMO_TRANSACTIONS into React Flow Edges
+  // Transform raw DEMO_TRANSACTIONS into React Flow Edges (filtered by progressive step)
   const initialEdges: Edge[] = useMemo(() => {
     const isHorizontal = graphMode === 'flow';
     const sourceHandleId = isHorizontal ? 'source-right' : 'source-bottom';
     const targetHandleId = isHorizontal ? 'target-left' : 'target-top';
 
-    const hasFocusFilter = Boolean(selectedWalletId) || Boolean(activeDetection) || highlightedEdgeIds.length > 0 || isTracingPrimary || chainFilter !== 'all';
+    const isExplicitFilterActive =
+      Boolean(activeDetection) ||
+      highlightedEdgeIds.length > 0 ||
+      isTracingPrimary ||
+      chainFilter !== 'all';
 
-    return DEMO_TRANSACTIONS.map((tx) => {
+    return DEMO_TRANSACTIONS.filter((tx) => {
+      // If sequential reconstruction is active, only show edges manifested up to this step
+      if (isReconstructionActive) {
+        return currentStepConfig.edgeIds.includes(tx.id);
+      }
+      return true;
+    }).map((tx) => {
       const isSelected = selectedTransactionId === tx.id;
-      const isDirectlyConnected = selectedWalletId ? (tx.from === selectedWalletId || tx.to === selectedWalletId) : false;
+      const isDirectlyConnected = selectedWalletId
+        ? tx.from === selectedWalletId || tx.to === selectedWalletId
+        : false;
       const isDetectionAffected = activeDetection
         ? activeDetection.affectedEdges.includes(tx.id)
         : false;
@@ -300,7 +466,7 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
       const matchesChainFilter =
         chainFilter === 'all' || tx.chain.toLowerCase() === chainFilter.toLowerCase();
 
-      const isDimmed = (hasFocusFilter && !isHighlighted) || !matchesChainFilter;
+      const isDimmed = isExplicitFilterActive ? !isHighlighted : !matchesChainFilter;
 
       return {
         id: tx.id,
@@ -322,9 +488,9 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          width: 10,
-          height: 10,
-          color: isHighlighted ? '#F5F5F5' : isDimmed ? 'rgba(255,255,255,0.12)' : '#555555',
+          width: 12,
+          height: 12,
+          color: isHighlighted ? '#F5F5F5' : isDimmed ? '#202020' : '#555555',
         },
       };
     });
@@ -340,6 +506,8 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     animateFlow,
     onSelectTransaction,
     graphMode,
+    isReconstructionActive,
+    currentStepConfig,
   ]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -378,12 +546,12 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     const coordsMap = graphMode === 'orbital' ? ORBITAL_COORDS : FLOW_COORDS;
     const target = coordsMap[walletId];
     if (target) {
-      setCenter(target.x + 20, target.y + 20, { duration: 400, zoom: 1.15 });
+      setCenter(target.x + 135, target.y + 120, { duration: 400, zoom: 1.1 });
     }
   };
 
   const handleFitView = () => {
-    fitView({ padding: 0.16, duration: 350 });
+    fitView({ padding: 0.14, duration: 400 });
   };
 
   const handleReset = () => {
@@ -392,7 +560,21 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
     setIsTracingPrimary(false);
     onSelectWallet(null);
     if (onClearHighlight) onClearHighlight();
-    fitView({ padding: 0.16, duration: 350 });
+    fitView({ padding: 0.14, duration: 400 });
+  };
+
+  // Replay sequential reconstruction from Step 0
+  const handleReplaySequence = () => {
+    setIsReconstructionActive(true);
+    setReconstructionStep(0);
+    setIsPlaying(true);
+  };
+
+  // Show all blocks immediately
+  const handleShowAll = () => {
+    setIsReconstructionActive(false);
+    setIsPlaying(false);
+    fitView({ padding: 0.14, duration: 400 });
   };
 
   return (
@@ -406,12 +588,12 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
         edgeTypes={edgeTypes}
         onNodeClick={handleNodeClick}
         onEdgeClick={handleEdgeClick}
-        minZoom={0.25}
+        minZoom={0.2}
         maxZoom={2.4}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.85 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
         proOptions={{ hideAttribution: true }}
       >
-        {/* Section 23: Obsidian Dot Grid */}
+        {/* Obsidian Dot Grid (Commit 099030a theme) */}
         <Background
           variant={BackgroundVariant.Dots}
           gap={24}
@@ -423,87 +605,90 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
         {showMiniMap && (
           <MiniMap
             nodeColor={(n) => {
-              if (n.id === 'suspect')  return '#DDDDDD';
-              if (n.id === 'victim')   return '#AAAAAA';
-              if (n.id === 'exchange') return '#888888';
-              if (n.id === 'bridge')   return '#666666';
-              return '#555555';
+              if (n.id === 'suspect') return '#FFFFFF';
+              if (n.id === 'victim') return '#D4D4D4';
+              if (n.id === 'exchange') return '#A3A3A3';
+              if (n.id === 'bridge') return '#737373';
+              return '#525252';
             }}
             nodeStrokeWidth={1}
-            nodeBorderRadius={12}
-            className="!bg-[#0C0C0C] !border !border-[#202020] !rounded-[4px] !bottom-3 !right-3"
+            nodeBorderRadius={4}
+            className="!bg-obsidian-900 !border !border-obsidian-750 !rounded-md !bottom-16 !right-3 shadow-xl"
           />
         )}
       </ReactFlow>
 
-      {/* Section 28: Compact Tactical HUD (Height: 30px, Background: #111216, Border: #23252D) */}
+      {/* Smooth Layout Transition CSS for React Flow Nodes */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        .react-flow__node {
+          transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+      `,
+        }}
+      />
+
+      {/* Tactical HUD Bar (Top Control Panel — Strict Monochrome) */}
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-30 font-mono text-[11px]">
-        {/* Left Cluster: Modes & Filters */}
+        {/* Left Cluster: Modes, Filters & Replay */}
         <div className="flex items-center space-x-1.5 pointer-events-auto">
           {/* Mode Switcher: FLOW vs ORBITAL */}
-          <div className="h-[30px] flex items-center bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[4px] shadow-md">
-            <button
-              onClick={() => setGraphMode('flow')}
-              className={`px-2.5 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
-                graphMode === 'flow'
-                  ? 'bg-sand-100 text-obsidian-950 font-bold'
-                  : 'text-zinc-400 hover:text-sand-100'
-              }`}
-            >
-              FLOW
-            </button>
-            <button
-              onClick={() => setGraphMode('orbital')}
-              className={`px-2.5 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
-                graphMode === 'orbital'
-                  ? 'bg-sand-100 text-obsidian-950 font-bold'
-                  : 'text-zinc-400 hover:text-sand-100'
-              }`}
-            >
-              ORBITAL
-            </button>
+          <div className="h-[30px] flex items-center bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[6px] shadow-md relative">
+            {['flow', 'orbital'].map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setGraphMode(mode as 'flow' | 'orbital')}
+                className={`relative px-3 py-0.5 rounded-[4px] transition-colors cursor-pointer text-[10px] uppercase font-bold tracking-wider z-10 ${
+                  graphMode === mode
+                    ? 'text-obsidian-950'
+                    : 'text-zinc-500 hover:text-sand-300'
+                }`}
+              >
+                {graphMode === mode && (
+                  <div className="absolute inset-0 bg-sand-100 rounded-[4px] -z-10 shadow-sm transition-all duration-300" />
+                )}
+                {mode}
+              </button>
+            ))}
           </div>
 
           {/* Chain Filters: ALL / ETH / POL */}
-          <div className="h-[30px] flex items-center bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[4px] shadow-md">
-            <button
-              onClick={() => setChainFilter('all')}
-              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
-                chainFilter === 'all'
-                  ? 'bg-obsidian-850 text-sand-100 font-bold border border-sand-850'
-                  : 'text-zinc-400 hover:text-sand-100'
-              }`}
-            >
-              ALL
-            </button>
-            <button
-              onClick={() => setChainFilter('Ethereum')}
-              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
-                chainFilter === 'Ethereum'
-                  ? 'bg-obsidian-850 text-sand-100 font-bold border border-sand-850'
-                  : 'text-zinc-400 hover:text-sand-100'
-              }`}
-            >
-              ETH
-            </button>
-            <button
-              onClick={() => setChainFilter('Polygon')}
-              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
-                chainFilter === 'Polygon'
-                  ? 'bg-obsidian-850 text-sand-100 font-bold border border-sand-850'
-                  : 'text-zinc-400 hover:text-sand-100'
-              }`}
-            >
-              POL
-            </button>
+          <div className="h-[30px] flex items-center bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[6px] shadow-md relative">
+            {['all', 'Ethereum', 'Polygon'].map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setChainFilter(filter as 'all' | 'Ethereum' | 'Polygon')}
+                className={`relative px-2.5 py-0.5 rounded-[4px] transition-colors cursor-pointer text-[10px] uppercase font-bold tracking-wider z-10 ${
+                  chainFilter === filter ? 'text-sand-100' : 'text-zinc-500 hover:text-sand-300'
+                }`}
+              >
+                {chainFilter === filter && (
+                  <div className="absolute inset-0 bg-obsidian-800 border border-obsidian-700 rounded-[4px] -z-10 transition-all duration-300" />
+                )}
+                {filter === 'all' ? 'ALL' : filter === 'Ethereum' ? 'ETH' : 'POL'}
+              </button>
+            ))}
           </div>
 
+          {/* Forensic Sequence Replay Button */}
+          <button
+            onClick={handleReplaySequence}
+            className="h-[30px] px-2.5 bg-obsidian-900 border border-obsidian-750 hover:border-sand-300 text-sand-300 hover:text-sand-100 rounded-[6px] shadow-md flex items-center space-x-1.5 transition cursor-pointer text-[10px] uppercase font-bold"
+            title="Reconstruct on-chain fund flows block by block"
+          >
+            <RotateCcw className="w-3 h-3 text-sand-100" />
+            <span className="hidden sm:inline">REPLAY FLOW</span>
+          </button>
+
           {/* Display Overlays: Splits, Amounts, Exit Path */}
-          <div className="h-[30px] hidden sm:flex items-center space-x-1 bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[4px] shadow-md">
+          <div className="h-[30px] hidden md:flex items-center space-x-1 bg-obsidian-900 border border-obsidian-750 p-0.5 rounded-[4px] shadow-md">
             <button
               onClick={() => setShowPercentages(!showPercentages)}
-              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
-                showPercentages ? 'bg-obsidian-850 text-sand-100' : 'text-zinc-500 hover:text-zinc-300'
+              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer text-[10px] ${
+                showPercentages
+                  ? 'bg-obsidian-850 text-sand-100'
+                  : 'text-zinc-500 hover:text-zinc-300'
               }`}
               title="Toggle split percentages"
             >
@@ -511,8 +696,10 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
             </button>
             <button
               onClick={() => setShowEdgeLabels(!showEdgeLabels)}
-              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer ${
-                showEdgeLabels ? 'bg-obsidian-850 text-sand-100' : 'text-zinc-500 hover:text-zinc-300'
+              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer text-[10px] ${
+                showEdgeLabels
+                  ? 'bg-obsidian-850 text-sand-100'
+                  : 'text-zinc-500 hover:text-zinc-300'
               }`}
               title="Toggle amounts"
             >
@@ -520,7 +707,7 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
             </button>
             <button
               onClick={() => setIsTracingPrimary(!isTracingPrimary)}
-              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer flex items-center space-x-1 ${
+              className={`px-2 py-0.5 rounded-[2px] transition-colors cursor-pointer flex items-center space-x-1 text-[10px] ${
                 isTracingPrimary
                   ? 'bg-sand-100 text-obsidian-950 font-bold'
                   : 'text-zinc-400 hover:text-sand-100'
@@ -580,7 +767,9 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
             <button
               onClick={() => setShowMiniMap(!showMiniMap)}
               className={`p-1 rounded-[2px] transition cursor-pointer ${
-                showMiniMap ? 'bg-obsidian-850 text-sand-100' : 'text-zinc-400 hover:text-sand-100'
+                showMiniMap
+                  ? 'bg-obsidian-850 text-sand-100'
+                  : 'text-zinc-400 hover:text-sand-100'
               }`}
               title="Toggle MiniMap"
             >
@@ -596,7 +785,9 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
             <button
               onClick={() => setShowLegend(!showLegend)}
               className={`p-1 rounded-[2px] transition cursor-pointer ${
-                showLegend ? 'bg-sand-100 text-obsidian-950' : 'text-zinc-400 hover:text-sand-100'
+                showLegend
+                  ? 'bg-sand-100 text-obsidian-950 font-bold'
+                  : 'text-zinc-400 hover:text-sand-100'
               }`}
               title="Toggle graph legend"
             >
@@ -606,43 +797,156 @@ const InnerTransactionGraph: React.FC<TransactionGraphProps> = ({
         </div>
       </div>
 
-      {/* Forensic Graph Legend — grayscale hierarchy */}
+      {/* FLOATING SEQUENTIAL FORENSIC RECONSTRUCTION PLAYER (Bottom HUD) */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto select-none font-mono">
+        <div className="flex items-center space-x-3 bg-obsidian-900/95 border border-obsidian-750 px-4 py-2 rounded-xl shadow-2xl backdrop-blur-xl text-xs">
+          {/* Play / Pause Toggle Button */}
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="p-1.5 rounded-lg bg-obsidian-850 border border-obsidian-700 hover:border-sand-300 text-sand-100 hover:bg-obsidian-800 transition cursor-pointer"
+            title={isPlaying ? 'Pause chronological reconstruction' : 'Resume reconstruction'}
+          >
+            {isPlaying ? (
+              <Pause className="w-3.5 h-3.5 fill-current" />
+            ) : (
+              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+            )}
+          </button>
+
+          {/* Replay Button */}
+          <button
+            onClick={handleReplaySequence}
+            className="p-1.5 rounded-lg bg-obsidian-850 border border-obsidian-700 hover:border-sand-300 text-sand-300 hover:text-sand-100 transition cursor-pointer"
+            title="Restart from Step 1"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Step Progress Indicators (Clickable Hop Dots) */}
+          <div className="flex items-center space-x-1.5 px-2 border-l border-r border-obsidian-750">
+            {RECONSTRUCTION_STEPS.map((s, idx) => {
+              const isCurrent = isReconstructionActive && reconstructionStep === idx;
+              const isPassed = !isReconstructionActive || reconstructionStep > idx;
+
+              return (
+                <button
+                  key={s.step}
+                  onClick={() => {
+                    setIsReconstructionActive(true);
+                    setReconstructionStep(idx);
+                    setIsPlaying(false);
+                  }}
+                  className={`px-2 py-1 rounded-[4px] text-[10px] font-bold transition-all cursor-pointer border ${
+                    isCurrent
+                      ? 'bg-sand-100 text-obsidian-950 border-sand-100 shadow-[0_0_10px_rgba(255,255,255,0.4)] scale-105'
+                      : isPassed
+                      ? 'bg-obsidian-800 text-sand-200 border-obsidian-700 hover:border-sand-300'
+                      : 'bg-obsidian-950 text-sand-500 border-obsidian-850 hover:text-sand-400'
+                  }`}
+                  title={`${s.time} — ${s.description}`}
+                >
+                  HOP {idx + 1}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Telemetry Status / Timestamp */}
+          <div className="flex flex-col min-w-[170px] max-w-[280px]">
+            <div className="flex items-center space-x-1.5 text-[10.5px]">
+              <Clock className="w-3 h-3 text-sand-400 shrink-0" />
+              <span className="text-sand-100 font-bold truncate">
+                {currentStepConfig.label}
+              </span>
+              <span className="text-sand-500">•</span>
+              <span className="text-sand-400 text-[10px]">{currentStepConfig.time}</span>
+            </div>
+            <span className="text-[9.5px] text-sand-400 truncate leading-tight mt-0.5">
+              {currentStepConfig.description}
+            </span>
+          </div>
+
+          {/* Playback Speed Toggle */}
+          <button
+            onClick={() => setPlaybackSpeed(playbackSpeed === 1 ? 1.5 : playbackSpeed === 1.5 ? 2 : 1)}
+            className="px-2 py-1 rounded bg-obsidian-850 border border-obsidian-700 hover:border-sand-300 text-sand-300 hover:text-sand-100 text-[10px] font-bold cursor-pointer transition"
+            title="Adjust sequence playback speed"
+          >
+            {playbackSpeed}x
+          </button>
+
+          {/* Show All Toggle */}
+          <button
+            onClick={isReconstructionActive ? handleShowAll : handleReplaySequence}
+            className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold uppercase transition border cursor-pointer ${
+              !isReconstructionActive
+                ? 'bg-obsidian-800 text-sand-100 border-obsidian-700 hover:bg-obsidian-750'
+                : 'bg-sand-100 text-obsidian-950 border-sand-100 hover:bg-white'
+            }`}
+          >
+            {!isReconstructionActive ? 'SHOW FLOW' : 'SHOW ALL'}
+          </button>
+        </div>
+      </div>
+
+      {/* Forensic Graph Legend — Strict Monochrome Hierarchy */}
       {showLegend && (
-        <div className="absolute top-12 right-3 z-30 w-64 bg-[#0C0C0C] border border-[#303030] p-3 rounded-[4px] shadow-2xl text-[10px] font-mono space-y-2 text-[#888888]">
-          <div className="flex items-center justify-between border-b border-[#202020] pb-1.5">
-            <span className="text-[#F5F5F5] font-bold uppercase tracking-wider">
+        <div className="absolute top-12 right-3 z-30 w-64 bg-obsidian-900/90 backdrop-blur-xl border border-obsidian-750 p-4 rounded-[8px] shadow-2xl text-[10px] font-mono space-y-3 text-sand-400">
+          <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+            <span className="text-sand-100 font-bold uppercase tracking-wider">
               ENTITY TYPE LEGEND
             </span>
-            <button onClick={() => setShowLegend(false)} className="text-[#555555] hover:text-[#F5F5F5]">
-              <X className="w-3 h-3" />
+            <button
+              onClick={() => setShowLegend(false)}
+              className="text-sand-500 hover:text-sand-100 transition"
+            >
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="space-y-2 text-[10px]">
+          <div className="space-y-3 text-[10px]">
             {[
-              { label: 'PRIMARY SUSPECT',   size: 14, ring: '#F5F5F5', desc: 'Largest node · solid white ring' },
-              { label: 'VICTIM INGRESS',     size: 12, ring: '#CCCCCC', desc: 'Medium · light gray ring' },
-              { label: 'VASP / EXCHANGE',    size: 11, ring: '#AAAAAA', desc: 'Medium · gray ring' },
-              { label: 'CROSS-CHAIN BRIDGE', size: 10, ring: '#777777', desc: 'Small · dashed gray ring' },
-              { label: 'INTERMEDIARY',       size: 9,  ring: '#555555', desc: 'Smallest · dark ring' },
+              {
+                label: 'PRIMARY TARGET [HUB]',
+                color: '#F5F5F5',
+                desc: 'White border · Central entity',
+              },
+              {
+                label: 'VICTIM INGRESS',
+                color: '#D4D4D8',
+                desc: 'Light gray · Initial source',
+              },
+              {
+                label: 'VASP / EXCHANGE',
+                color: '#A1A1AA',
+                desc: 'Mid gray · Liquidation point',
+              },
+              {
+                label: 'CROSS-CHAIN BRIDGE',
+                color: '#71717A',
+                desc: 'Dashed gray · Chain swap',
+              },
+              {
+                label: 'INTERMEDIARY RELAYS',
+                color: '#52525B',
+                desc: 'Darkest · Transit nodes',
+              },
             ].map((item) => (
-              <div key={item.label} className="flex items-center space-x-2">
+              <div key={item.label} className="flex items-center space-x-3">
                 <div
-                  className="rounded-full shrink-0 flex items-center justify-center"
-                  style={{ width: item.size + 4, height: item.size + 4, border: `1.5px solid ${item.ring}`, background: '#101010' }}
-                >
-                  <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#FFFFFF', opacity: 0.5 }} />
-                </div>
+                  className="rounded-full shrink-0"
+                  style={{ width: 14, height: 14, backgroundColor: item.color }}
+                />
                 <div>
-                  <div className="text-[#DDDDDD] font-medium">{item.label}</div>
-                  <div className="text-[#444444] text-[9px]">{item.desc}</div>
+                  <div className="text-sand-200 font-bold">{item.label}</div>
+                  <div className="text-sand-500 text-[9px] mt-0.5">{item.desc}</div>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="pt-1.5 border-t border-[#202020] text-[9px] text-[#444444]">
-            Click any node to focus its subgraph. Hierarchy by size + ring brightness.
+          <div className="pt-2 border-t border-obsidian-750 text-[9.5px] text-sand-500 leading-relaxed">
+            Click any node to focus its subgraph and view detailed on-chain intelligence.
           </div>
         </div>
       )}

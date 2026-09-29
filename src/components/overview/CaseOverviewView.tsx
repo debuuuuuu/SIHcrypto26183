@@ -26,11 +26,10 @@ interface CaseOverviewViewProps {
   onOpenReport: () => void;
   onSelectWallet: (walletId: string) => void;
   caseData?: InvestigationCase;
-  caseData?: InvestigationCase;
 }
 
 const NumberTicker = ({ value, duration = 1500, suffix = '', prefix = '', isDecimal = false }: { value: number, duration?: number, suffix?: string, prefix?: string, isDecimal?: boolean }) => {
-  const [count, useStateCount] = useState(0);
+  const [count, setCount] = useState(0);
   
   React.useEffect(() => {
     let startTimestamp: number | null = null;
@@ -39,7 +38,7 @@ const NumberTicker = ({ value, duration = 1500, suffix = '', prefix = '', isDeci
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
       const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      useStateCount(value * ease);
+      setCount(value * ease);
       if (progress < 1) {
         animationFrame = window.requestAnimationFrame(step);
       }
@@ -79,27 +78,37 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
   const [activeRadialIndex, setActiveRadialIndex] = useState<number | null>(null);
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-obsidian-950 text-sand-100 p-4 lg:p-6 font-sans select-none space-y-4">
-      <div className="max-w-6xl mx-auto space-y-4">
+    <div className="h-full w-full overflow-y-auto bg-obsidian-950 text-sand-100 p-4 lg:p-8 font-sans select-none relative">
+      {/* Premium Apple-style ambient dot matrix background */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+      
+      {/* Animated ambient background blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[20%] w-[40vw] h-[40vw] bg-white/[0.015] rounded-full mix-blend-screen filter blur-[100px] animate-blob"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[35vw] h-[35vw] bg-white/[0.015] rounded-full mix-blend-screen filter blur-[100px] animate-blob" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute -bottom-[20%] left-[40%] w-[50vw] h-[50vw] bg-white/[0.015] rounded-full mix-blend-screen filter blur-[100px] animate-blob" style={{ animationDelay: '6s' }}></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-[1800px] mx-auto space-y-6">
         {/* NCRP & Case Coordination Header */}
-        <div className="bg-obsidian-900 border border-obsidian-750 p-4 rounded-[6px] space-y-3 opacity-0 animate-fade-in-up">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-obsidian-750 pb-2.5">
+        <div className="bg-obsidian-950/60 backdrop-blur-md border border-white/10 p-5 rounded-xl shadow-2xl transition-all duration-300 hover:bg-obsidian-950/80 hover:border-white/20 space-y-3 opacity-0 animate-fade-in-up">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-2.5">
             <div className="flex items-center space-x-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
                 OVERVIEW // CASE / {ncrpAck}
               </span>
             </div>
             <div className="flex items-center space-x-2 font-mono text-xs">
-              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-950 text-zinc-500 border border-obsidian-750 hidden sm:block">
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-black/20 text-zinc-400 border border-white/10 hidden sm:block">
                 OP-ID: 7X-99
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-950 text-zinc-500 border border-obsidian-750 hidden md:block">
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-black/20 text-zinc-400 border border-white/10 hidden md:block">
                 SYNC: Just now
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-850 text-sand-300 border border-obsidian-750">
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-white/5 text-sand-300 border border-white/10">
                 {sahyogTicket}
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-[4px] bg-obsidian-950 text-sand-100 border border-obsidian-750 flex items-center gap-1.5 animate-pulse-radar">
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-black/30 text-sand-100 border border-white/10 flex items-center gap-1.5 animate-pulse-radar">
                 <span className="w-1.5 h-1.5 rounded-full bg-sand-100 animate-pulse" />
                 <span>SAHYOG ACTIVE</span>
               </span>
@@ -107,20 +116,20 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono">
-            <div className="p-2.5 bg-obsidian-950 border border-obsidian-750 rounded-[4px]">
-              <span className="text-zinc-600 block text-[9px] uppercase">COMPLAINANT</span>
+            <div className="p-3 bg-black/20 border border-white/10 rounded-lg">
+              <span className="text-zinc-500 block text-[9px] uppercase">COMPLAINANT</span>
               <span className="text-sand-100 font-semibold truncate block mt-0.5">{complainant}</span>
             </div>
-            <div className="p-2.5 bg-obsidian-950 border border-obsidian-750 rounded-[4px]">
-              <span className="text-zinc-600 block text-[9px] uppercase">FIR / GD REFERENCE</span>
+            <div className="p-3 bg-black/20 border border-white/10 rounded-lg">
+              <span className="text-zinc-500 block text-[9px] uppercase">FIR / GD REFERENCE</span>
               <span className="text-sand-300 truncate block mt-0.5">{firNo}</span>
             </div>
-            <div className="p-2.5 bg-obsidian-950 border border-obsidian-750 rounded-[4px]">
-              <span className="text-zinc-600 block text-[9px] uppercase">JURISDICTION</span>
+            <div className="p-3 bg-black/20 border border-white/10 rounded-lg">
+              <span className="text-zinc-500 block text-[9px] uppercase">JURISDICTION</span>
               <span className="text-zinc-400 truncate block mt-0.5">{policeStation}</span>
             </div>
-            <div className="p-2.5 bg-obsidian-950 border border-obsidian-750 rounded-[4px]">
-              <span className="text-zinc-600 block text-[9px] uppercase">LEDGER NETWORKS</span>
+            <div className="p-3 bg-black/20 border border-white/10 rounded-lg">
+              <span className="text-zinc-500 block text-[9px] uppercase">LEDGER NETWORKS</span>
               <span className="text-sand-100 font-semibold block mt-0.5">{activeCase.chains.join(' · ')}</span>
             </div>
           </div>
@@ -132,9 +141,9 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
         {/* =================================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Funnel Flow Chart (7 cols) - Inspired by Image 3 */}
-          <div className="lg:col-span-7 bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-5 space-y-4 text-left flex flex-col justify-between opacity-0 animate-fade-in-up-delay-1">
+          <div className="lg:col-span-7 bg-obsidian-950/60 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl transition-all duration-300 hover:bg-obsidian-950/80 hover:border-white/20 space-y-4 text-left flex flex-col justify-between opacity-0 animate-fade-in-up-delay-1">
             <div>
-              <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+              <div className="flex items-center justify-between border-b border-white/10 pb-2">
                 <div>
                   <div className="flex items-baseline space-x-2">
                     <span className="text-2xl font-bold font-mono text-sand-100">
@@ -189,10 +198,31 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
                         <stop offset="100%" stopColor="#71717A" stopOpacity="0.55" />
                       </linearGradient>
                       <linearGradient id="funnelBand2" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#A3A3A3" stopOpacity="0.35" />
-                        <stop offset="50%" stopColor="#71717A" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#3F3F46" stopOpacity="0.18" />
+                        <stop offset="0%" stopColor="#A3A3A3" stopOpacity="0.35">
+                          <animate attributeName="stopOpacity" values="0.35;0.5;0.35" dur="4s" repeatCount="indefinite" />
+                        </stop>
+                        <stop offset="50%" stopColor="#71717A" stopOpacity="0.25">
+                          <animate attributeName="stopOpacity" values="0.25;0.4;0.25" dur="4s" repeatCount="indefinite" />
+                        </stop>
+                        <stop offset="100%" stopColor="#3F3F46" stopOpacity="0.18">
+                          <animate attributeName="stopOpacity" values="0.18;0.3;0.18" dur="4s" repeatCount="indefinite" />
+                        </stop>
                       </linearGradient>
+                      <clipPath id="wipe-in">
+                        <rect x="0" y="0" width="0" height="120">
+                          <animate 
+                            attributeName="width" 
+                            from="0" 
+                            to="600" 
+                            dur="1.5s" 
+                            begin="0.2s" 
+                            fill="freeze" 
+                            calcMode="spline" 
+                            keySplines="0.25 1 0.5 1"
+                            keyTimes="0;1"
+                          />
+                        </rect>
+                      </clipPath>
                     </defs>
 
                     {/* Outer ambient contour */}
@@ -211,6 +241,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
                         Z
                       "
                       fill="url(#funnelBand2)"
+                      clipPath="url(#wipe-in)"
                     />
 
                     {/* Core dense flow stream */}
@@ -229,6 +260,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
                         Z
                       "
                       fill="url(#funnelBand1)"
+                      clipPath="url(#wipe-in)"
                     />
 
                     {/* Vertical Stage Divider Hairlines */}
@@ -239,22 +271,22 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
 
                   {/* Percentage Badges inside the stream (Matching Image 3) */}
                   <div className="absolute inset-0 grid grid-cols-4 items-center pointer-events-none">
-                    <div className="flex justify-center">
+                    <div className="flex justify-center opacity-0 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
                       <span className="px-2.5 py-0.5 bg-[#FFFFFF] text-[#050505] text-[10px] font-mono font-bold rounded-full shadow-sm">
                         100%
                       </span>
                     </div>
-                    <div className="flex justify-center">
+                    <div className="flex justify-center opacity-0 animate-fade-in-up" style={{ animationDelay: '0.9s' }}>
                       <span className="px-2.5 py-0.5 bg-[#FFFFFF] text-[#050505] text-[10px] font-mono font-bold rounded-full shadow-sm">
                         100%
                       </span>
                     </div>
-                    <div className="flex justify-center">
+                    <div className="flex justify-center opacity-0 animate-fade-in-up" style={{ animationDelay: '1.2s' }}>
                       <span className="px-2.5 py-0.5 bg-[#FFFFFF] text-[#050505] text-[10px] font-mono font-bold rounded-full shadow-sm">
                         35%
                       </span>
                     </div>
-                    <div className="flex justify-center">
+                    <div className="flex justify-center opacity-0 animate-fade-in-up" style={{ animationDelay: '1.5s' }}>
                       <span className="px-2.5 py-0.5 bg-[#FFFFFF] text-[#050505] text-[10px] font-mono font-bold rounded-full shadow-sm">
                         34%
                       </span>
@@ -263,7 +295,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
                 </div>
 
                 {/* Stage Names Underneath */}
-                <div className="grid grid-cols-4 text-center font-mono text-[10px] text-zinc-400 pt-2 border-t border-obsidian-750">
+                <div className="grid grid-cols-4 text-center font-mono text-[10px] text-zinc-400 pt-2 border-t border-white/10">
                   <span className="truncate">Ingress Loss</span>
                   <span className="truncate">Syndicate Hub</span>
                   <span className="truncate">Bridge Relay</span>
@@ -272,7 +304,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
               </div>
             </div>
 
-            <div className="pt-2 border-t border-obsidian-750 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+            <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-zinc-400">
               <span>PATHWAY: ETHEREUM L1 &rarr; POLYGON BRIDGE &rarr; CEX OFF-RAMP</span>
               <button
                 onClick={() => onNavigate('graph')}
@@ -285,8 +317,8 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
           </div>
 
           {/* Radial Segmented Wheel (5 cols) - Exact Match to Reference 4 */}
-          <div className="lg:col-span-5 bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-5 space-y-3 text-left flex flex-col justify-between opacity-0 animate-fade-in-up-delay-1">
-            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+          <div className="lg:col-span-5 bg-obsidian-950/60 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl transition-all duration-300 hover:bg-obsidian-950/80 hover:border-white/20 space-y-3 text-left flex flex-col justify-between opacity-0 animate-fade-in-up-delay-1">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <div>
                 <span className="text-[10px] font-mono text-zinc-500 uppercase block tracking-wider font-bold">
                   TRANCHE SPECTRUM // 8 RECONSTRUCTED FLOWS
@@ -295,7 +327,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
                   Analytical Radial Decomposition
                 </h3>
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-[4px] bg-obsidian-850 border border-obsidian-750 text-sand-300">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-sand-300">
                 8 TRANCHES
               </span>
             </div>
@@ -421,8 +453,8 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
         {/* =================================================================== */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Card 1: Detections with Dotted Hairline Progress Tracks (Matching Image 3) */}
-          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left opacity-0 animate-fade-in-up-delay-2">
-            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+          <div className="bg-obsidian-950/60 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl transition-all duration-300 hover:bg-obsidian-950/80 hover:border-white/20 space-y-3 text-left opacity-0 animate-fade-in-up-delay-2">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
                 01 // DETECTION PATTERNS
               </span>
@@ -445,7 +477,9 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
                 <div key={idx} className="flex items-center justify-between text-xs">
                   <span className="text-zinc-300 font-sans text-xs truncate mr-2">{item.title}</span>
                   <div className="flex items-center space-x-2 shrink-0">
-                    <span className="text-zinc-600 hidden sm:inline select-none">{item.dots}</span>
+                    <span className="text-zinc-600 hidden sm:inline select-none truncate opacity-50">
+                      {item.dots}
+                    </span>
                     <span className="text-sand-100 font-bold font-mono">{item.score}</span>
                   </div>
                 </div>
@@ -454,9 +488,9 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
           </div>
 
           {/* Card 2: Key Syndicate Interceptions (Matching Image 3 Center) */}
-          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left flex flex-col justify-between opacity-0 animate-fade-in-up-delay-2">
+          <div className="bg-obsidian-950/60 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl transition-all duration-300 hover:bg-obsidian-950/80 hover:border-white/20 space-y-3 text-left flex flex-col justify-between opacity-0 animate-fade-in-up-delay-2">
             <div>
-              <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+              <div className="flex items-center justify-between border-b border-white/10 pb-2">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
                   02 // ACTIONABLE TARGETS
                 </span>
@@ -466,39 +500,39 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
               <div className="space-y-2 pt-1 font-mono text-xs">
                 <div
                   onClick={() => onSelectWallet('suspect')}
-                  className="p-2 bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 rounded-[4px] cursor-pointer transition flex justify-between items-center"
+                  className="p-2.5 bg-black/30 hover:bg-white/5 border border-white/5 hover:border-white/20 rounded-lg cursor-pointer transition-all duration-300 flex justify-between items-center group"
                 >
                   <div>
-                    <span className="text-sand-100 font-bold block text-[11px]">Primary Suspect</span>
-                    <span className="text-[10px] text-zinc-500 select-all">0x7A92...F2D</span>
+                    <span className="text-sand-100 font-bold block text-[11px] group-hover:text-white transition-colors">Primary Suspect</span>
+                    <span className="text-[10px] text-zinc-500 select-all group-hover:text-zinc-400">0x7A92...F2D</span>
                   </div>
-                  <span className="text-[10px] text-sand-300 bg-obsidian-900 px-1.5 py-0.5 rounded-[4px] border border-obsidian-750">
+                  <span className="text-[10px] text-sand-300 bg-white/5 px-2 py-0.5 rounded-[4px] border border-white/10">
                     RISK 94
                   </span>
                 </div>
 
                 <div
                   onClick={() => onSelectWallet('exchange')}
-                  className="p-2 bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 rounded-[4px] cursor-pointer transition flex justify-between items-center"
+                  className="p-2.5 bg-black/30 hover:bg-white/5 border border-white/5 hover:border-white/20 rounded-lg cursor-pointer transition-all duration-300 flex justify-between items-center group"
                 >
                   <div>
-                    <span className="text-sand-100 font-bold block text-[11px]">Demo Exchange (CEX)</span>
-                    <span className="text-[10px] text-zinc-500 select-all">0x28C...556D</span>
+                    <span className="text-sand-100 font-bold block text-[11px] group-hover:text-white transition-colors">Demo Exchange (CEX)</span>
+                    <span className="text-[10px] text-zinc-500 select-all group-hover:text-zinc-400">0x28C...556D</span>
                   </div>
-                  <span className="text-[10px] text-sand-100 bg-obsidian-900 px-1.5 py-0.5 rounded-[4px] border border-obsidian-750 font-bold">
+                  <span className="text-[10px] text-sand-100 bg-white/10 px-2 py-0.5 rounded-[4px] border border-white/20 font-bold">
                     $680 SUBPOENA
                   </span>
                 </div>
 
                 <div
                   onClick={() => onSelectWallet('walletD')}
-                  className="p-2 bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 rounded-[4px] cursor-pointer transition flex justify-between items-center"
+                  className="p-2.5 bg-black/30 hover:bg-white/5 border border-white/5 hover:border-white/20 rounded-lg cursor-pointer transition-all duration-300 flex justify-between items-center group"
                 >
                   <div>
-                    <span className="text-sand-100 font-bold block text-[11px]">Static Cold Wallet D</span>
-                    <span className="text-[10px] text-zinc-500 select-all">0x4E8...311C</span>
+                    <span className="text-sand-100 font-bold block text-[11px] group-hover:text-white transition-colors">Static Cold Wallet D</span>
+                    <span className="text-[10px] text-zinc-500 select-all group-hover:text-zinc-400">0x4E8...311C</span>
                   </div>
-                  <span className="text-[10px] text-sand-300 bg-obsidian-900 px-1.5 py-0.5 rounded-[4px] border border-obsidian-750">
+                  <span className="text-[10px] text-sand-300 bg-white/5 px-2 py-0.5 rounded-[4px] border border-white/10">
                     $500 FREEZE
                   </span>
                 </div>
@@ -515,8 +549,8 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
           </div>
 
           {/* Card 3: Temporal Crime Window Velocity (Matching Image 3 Right) */}
-          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left opacity-0 animate-fade-in-up-delay-2">
-            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+          <div className="bg-obsidian-950/60 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl transition-all duration-300 hover:bg-obsidian-950/80 hover:border-white/20 space-y-3 text-left opacity-0 animate-fade-in-up-delay-2">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
                 03 // TEMPORAL VELOCITY
               </span>
@@ -539,7 +573,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
                         backgroundColor:
                           val > 0.8 ? '#FFFFFF' : val > 0.6 ? '#A3A3A3' : val > 0.4 ? '#52525B' : '#2A2A2A',
                       }}
-                      className="rounded-[2px] h-full"
+                      className={`rounded-[2px] h-full ${val > 0.8 ? 'animate-pulse-slow' : ''}`}
                       title={`Minute +${idx} activity intensity`}
                     />
                   ))}
@@ -551,7 +585,7 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-obsidian-750 text-[10px] text-zinc-400 space-y-1 font-sans">
+              <div className="pt-2 border-t border-white/10 text-[10px] text-zinc-400 space-y-1 font-sans">
                 <p>• 100% of victim disbursement atomized within 24 seconds.</p>
                 <p>• Cross-chain bridge hop completed in 69 seconds.</p>
               </div>
@@ -564,8 +598,8 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
         {/* =================================================================== */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 opacity-0 animate-fade-in-up-delay-3">
           {/* Card 4: Network Consensus Health */}
-          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
-            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+          <div className="bg-obsidian-950/60 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl transition-all duration-300 hover:bg-obsidian-950/80 hover:border-white/20 space-y-3 text-left">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
                 04 // NETWORK TELEMETRY
               </span>
@@ -575,104 +609,131 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
               </span>
             </div>
 
-            <div className="space-y-3 font-mono text-xs pt-1">
-              <div className="flex justify-between items-center border-b border-obsidian-800 pb-1.5">
-                <span className="text-zinc-500">L1 Base Fee</span>
-                <span className="text-sand-100 font-bold"><NumberTicker value={14} suffix=" Gwei" /></span>
+            <div className="space-y-2 mt-2 font-mono text-xs">
+              <div className="flex justify-between items-center group cursor-default">
+                <span className="text-zinc-500 transition-colors group-hover:text-sand-300">L1 Base Fee</span>
+                <span className="text-sand-100 font-semibold"><NumberTicker value={14} suffix=" Gwei" /></span>
               </div>
-              <div className="flex justify-between items-center border-b border-obsidian-800 pb-1.5">
-                <span className="text-zinc-500">Avg Confirmation</span>
-                <span className="text-sand-100 font-bold"><NumberTicker value={12.4} isDecimal suffix="s" /></span>
+              <div className="flex justify-between items-center group cursor-default">
+                <span className="text-zinc-500 transition-colors group-hover:text-sand-300">Avg Confirmation</span>
+                <span className="text-zinc-300 font-medium"><NumberTicker value={12.4} isDecimal suffix="s" /></span>
               </div>
-              <div className="flex justify-between items-center border-b border-obsidian-800 pb-1.5">
-                <span className="text-zinc-500">Contract Calls</span>
-                <span className="text-sand-100 font-bold"><NumberTicker value={342} /> calls/min</span>
+              <div className="flex justify-between items-center group cursor-default">
+                <span className="text-zinc-500 transition-colors group-hover:text-sand-300">Network Load</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-[2px]">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className={`w-1 h-3 rounded-[1px] ${i < 4 ? 'bg-sand-300 animate-pulse-slow' : 'bg-white/10'}`} style={{ animationDelay: `${i * 150}ms` }} />
+                    ))}
+                  </div>
+                  <span className="text-sand-300 font-medium text-[10px]">68%</span>
+                </div>
               </div>
-              <div className="flex justify-between items-center pb-1">
-                <span className="text-zinc-500">MEV Exposure</span>
-                <span className="text-sand-100 font-bold">HIGH (Front-run)</span>
+            </div>
+            
+            <div className="pt-2 mt-2 border-t border-white/5">
+              <div className="w-full h-[40px] flex items-end justify-between gap-1 group">
+                {[20, 35, 25, 45, 30, 50, 40, 60, 45, 55, 65, 50, 70].map((h, i) => (
+                  <div key={i} className="w-full bg-white/5 rounded-t-[2px] transition-all duration-300 group-hover:bg-white/10 cursor-pointer relative" style={{ height: `${h}%` }}>
+                    <div className="absolute top-0 w-full bg-white/40 animate-pulse-slow rounded-t-[2px]" style={{ height: '2px', animationDelay: `${i * 100}ms` }} />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Card 5: Risk Assessment Decomposition */}
-          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
-            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+          <div className="bg-obsidian-950/60 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl transition-all duration-300 hover:bg-obsidian-950/80 hover:border-white/20 space-y-3 text-left">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
                 05 // RISK DECOMPOSITION
               </span>
-              <span className="text-[10px] font-mono text-sand-100 font-bold bg-obsidian-850 px-1.5 py-0.5 rounded-[4px] border border-obsidian-750">
+              <span className="text-[10px] font-mono text-sand-100 font-bold bg-white/10 px-1.5 py-0.5 rounded-[4px] border border-white/10">
                 SCORE: 94
               </span>
             </div>
 
-            <div className="space-y-3 font-mono text-xs pt-1">
-              <div className="flex flex-col space-y-1">
-                <div className="flex justify-between text-[10px]">
-                  <span className="text-zinc-400">Tornado Cash Exposure</span>
-                  <span className="text-sand-100 font-bold">+45 pts</span>
+            <div className="space-y-3 mt-2 font-mono">
+              <div className="group cursor-pointer">
+                <div className="flex justify-between text-[10px] mb-1">
+                  <span className="text-zinc-400 group-hover:text-sand-100 transition-colors">Tornado Cash Exposure</span>
+                  <span className="text-sand-300">+45 pts</span>
                 </div>
-                <div className="w-full bg-obsidian-950 h-1 rounded-full overflow-hidden">
-                  <div className="bg-sand-100 h-full" style={{ width: '45%' }}></div>
-                </div>
-              </div>
-              
-              <div className="flex flex-col space-y-1">
-                <div className="flex justify-between text-[10px]">
-                  <span className="text-zinc-400">High-Velocity Structuring</span>
-                  <span className="text-sand-100 font-bold">+28 pts</span>
-                </div>
-                <div className="w-full bg-obsidian-950 h-1 rounded-full overflow-hidden">
-                  <div className="bg-sand-300 h-full" style={{ width: '28%' }}></div>
+                <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden relative border border-white/5">
+                  <div className="absolute top-0 left-0 h-full bg-sand-100 w-[45%] rounded-full shadow-[0_0_8px_rgba(255,255,255,0.3)] animate-pulse-slow" />
+                  <div className="absolute top-0 left-0 h-full w-[45%] animate-shimmer" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }} />
                 </div>
               </div>
 
-              <div className="flex flex-col space-y-1">
-                <div className="flex justify-between text-[10px]">
-                  <span className="text-zinc-400">OFAC Sanctioned Counterparty</span>
-                  <span className="text-sand-100 font-bold">+21 pts</span>
+              <div className="group cursor-pointer">
+                <div className="flex justify-between text-[10px] mb-1">
+                  <span className="text-zinc-400 group-hover:text-sand-100 transition-colors">High-Velocity Structuring</span>
+                  <span className="text-sand-300">+28 pts</span>
                 </div>
-                <div className="w-full bg-obsidian-950 h-1 rounded-full overflow-hidden">
-                  <div className="bg-zinc-500 h-full" style={{ width: '21%' }}></div>
+                <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden relative border border-white/5">
+                  <div className="absolute top-0 left-0 h-full bg-sand-300 w-[28%] rounded-full shadow-[0_0_8px_rgba(255,255,255,0.2)] animate-pulse-slow" style={{ animationDelay: '200ms' }} />
+                  <div className="absolute top-0 left-0 h-full w-[28%] animate-shimmer" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)', animationDelay: '200ms' }} />
+                </div>
+              </div>
+
+              <div className="group cursor-pointer">
+                <div className="flex justify-between text-[10px] mb-1">
+                  <span className="text-zinc-400 group-hover:text-sand-100 transition-colors">OFAC Sanctioned Entity</span>
+                  <span className="text-sand-300">+21 pts</span>
+                </div>
+                <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden relative border border-white/5">
+                  <div className="absolute top-0 left-0 h-full bg-zinc-400 w-[21%] rounded-full shadow-[0_0_8px_rgba(255,255,255,0.1)] animate-pulse-slow" style={{ animationDelay: '400ms' }} />
+                  <div className="absolute top-0 left-0 h-full w-[21%] animate-shimmer" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)', animationDelay: '400ms' }} />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Card 6: Jurisdiction Mapping */}
-          <div className="bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-4 space-y-3 text-left">
-            <div className="flex items-center justify-between border-b border-obsidian-750 pb-2">
+          <div className="bg-obsidian-950/60 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl transition-all duration-300 hover:bg-obsidian-950/80 hover:border-white/20 space-y-3 text-left">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sand-100">
                 06 // JURISDICTION MAPPING
               </span>
               <span className="text-[10px] font-mono text-zinc-500">3 REGIONS</span>
             </div>
 
-            <div className="space-y-2 font-mono text-xs pt-1">
-              <div className="p-2 border border-obsidian-750 rounded-[4px] bg-obsidian-950 flex justify-between items-center">
+            <div className="space-y-2 mt-2 font-mono">
+              <div className="p-2.5 border border-white/5 hover:border-white/20 rounded-lg bg-black/30 flex justify-between items-center cursor-pointer transition-all duration-300 group hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                 <div>
-                  <span className="text-sand-100 font-bold block text-[11px]">Seychelles (SC)</span>
-                  <span className="text-[9px] text-zinc-500">CEX Headquarters</span>
+                  <div className="text-sand-100 font-semibold text-xs flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse-slow" />
+                    Seychelles (SC)
+                  </div>
+                  <div className="text-zinc-500 text-[9px] mt-0.5 group-hover:text-zinc-400 transition-colors">CEX Headquarters</div>
                 </div>
-                <span className="text-[10px] bg-obsidian-850 px-1.5 py-0.5 rounded-[2px] text-sand-300 border border-obsidian-750">
+                <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-[4px] text-sand-100 border border-white/10 group-hover:bg-white/10 transition-colors">
                   MLAT req.
                 </span>
               </div>
-              <div className="p-2 border border-obsidian-750 rounded-[4px] bg-obsidian-950 flex justify-between items-center">
+              
+              <div className="p-2.5 border border-white/5 hover:border-white/20 rounded-lg bg-black/30 flex justify-between items-center cursor-pointer transition-all duration-300 group hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                 <div>
-                  <span className="text-sand-100 font-bold block text-[11px]">British Virgin Islands (VG)</span>
-                  <span className="text-[9px] text-zinc-500">Bridge Operator</span>
+                  <div className="text-sand-100 font-semibold text-xs flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-pulse-slow" style={{ animationDelay: '200ms' }} />
+                    British Virgin Islands (VG)
+                  </div>
+                  <div className="text-zinc-500 text-[9px] mt-0.5 group-hover:text-zinc-400 transition-colors">Bridge Operator</div>
                 </div>
-                <span className="text-[10px] bg-obsidian-850 px-1.5 py-0.5 rounded-[2px] text-sand-300 border border-obsidian-750">
+                <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-[4px] text-zinc-300 border border-white/10 group-hover:bg-white/10 transition-colors">
                   Subpoena
                 </span>
               </div>
-              <div className="p-2 border border-obsidian-750 rounded-[4px] bg-obsidian-950 flex justify-between items-center">
+
+              <div className="p-2.5 border border-white/5 hover:border-white/20 rounded-lg bg-black/30 flex justify-between items-center cursor-pointer transition-all duration-300 group hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                 <div>
-                  <span className="text-sand-100 font-bold block text-[11px]">United States (US)</span>
-                  <span className="text-[9px] text-zinc-500">Node Hosting</span>
+                  <div className="text-sand-100 font-semibold text-xs flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse-slow" style={{ animationDelay: '400ms' }} />
+                    United States (US)
+                  </div>
+                  <div className="text-zinc-500 text-[9px] mt-0.5 group-hover:text-zinc-400 transition-colors">Node Hosting</div>
                 </div>
-                <span className="text-[10px] bg-obsidian-850 px-1.5 py-0.5 rounded-[2px] text-sand-300 border border-obsidian-750">
+                <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-[4px] text-zinc-300 border border-white/10 group-hover:bg-white/10 transition-colors">
                   Direct
                 </span>
               </div>
@@ -681,49 +742,49 @@ export const CaseOverviewView: React.FC<CaseOverviewViewProps> = ({
         </div>
 
         {/* Quick Fast Jump Actions */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 opacity-0 animate-fade-in-up-delay-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 opacity-0 animate-fade-in-up-delay-4">
           <button
             onClick={() => onNavigate('graph')}
-            className="p-3 bg-obsidian-900 hover:bg-obsidian-850 border border-obsidian-750 hover:border-sand-300 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer"
+            className="p-4 bg-obsidian-950/60 backdrop-blur-md border border-white/10 hover:border-white/30 rounded-xl text-left transition-all duration-300 flex items-center justify-between cursor-pointer group hover:bg-white/[0.03] hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]"
           >
             <div>
-              <span className="text-[11px] font-mono font-bold text-sand-100 block">TRANSACTION GRAPH</span>
+              <span className="text-[11px] font-mono font-bold text-sand-100 block group-hover:text-white transition-colors">TRANSACTION GRAPH</span>
               <span className="text-[9px] font-mono text-zinc-500">Interactive network</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+            <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-sand-100 transition-colors" />
           </button>
 
           <button
             onClick={() => onNavigate('timeline')}
-            className="p-3 bg-obsidian-900 hover:bg-obsidian-850 border border-obsidian-750 hover:border-sand-300 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer"
+            className="p-4 bg-obsidian-950/60 backdrop-blur-md border border-white/10 hover:border-white/30 rounded-xl text-left transition-all duration-300 flex items-center justify-between cursor-pointer group hover:bg-white/[0.03] hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]"
           >
             <div>
-              <span className="text-[11px] font-mono font-bold text-sand-100 block">TIMELINE LEDGER</span>
+              <span className="text-[11px] font-mono font-bold text-sand-100 block group-hover:text-white transition-colors">TIMELINE LEDGER</span>
               <span className="text-[9px] font-mono text-zinc-500">8 Traced transfers</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+            <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-sand-100 transition-colors" />
           </button>
 
           <button
             onClick={() => onNavigate('evidence')}
-            className="p-3 bg-obsidian-900 hover:bg-obsidian-850 border border-obsidian-750 hover:border-sand-300 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer"
+            className="p-4 bg-obsidian-950/60 backdrop-blur-md border border-white/10 hover:border-white/30 rounded-xl text-left transition-all duration-300 flex items-center justify-between cursor-pointer group hover:bg-white/[0.03] hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]"
           >
             <div>
-              <span className="text-[11px] font-mono font-bold text-sand-100 block">EVIDENCE LOCKBOX</span>
+              <span className="text-[11px] font-mono font-bold text-sand-100 block group-hover:text-white transition-colors">EVIDENCE LOCKBOX</span>
               <span className="text-[9px] font-mono text-zinc-500">6 Sealed artifacts</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+            <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-sand-100 transition-colors" />
           </button>
 
           <button
             onClick={onOpenReport}
-            className="p-3 bg-sand-100 hover:bg-white text-obsidian-950 rounded-[4px] text-left transition flex items-center justify-between cursor-pointer shadow-xs"
+            className="p-4 bg-sand-100 hover:bg-white text-obsidian-950 border border-sand-100 hover:border-white rounded-xl text-left transition-all duration-300 flex items-center justify-between cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] group"
           >
             <div>
               <span className="text-[11px] font-mono font-bold block">COURT DOSSIER</span>
               <span className="text-[9px] font-mono text-obsidian-850">Sec 65B Certified</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-obsidian-950" />
+            <ArrowRight className="w-3.5 h-3.5 text-obsidian-950 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
       </div>

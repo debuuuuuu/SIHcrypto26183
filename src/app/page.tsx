@@ -247,17 +247,19 @@ export default function Home(props: {
   ];
 
   return (
-    <div className="min-h-screen h-full flex-1 flex flex-col bg-obsidian-950 text-sand-100 w-full max-w-full overflow-x-hidden font-sans">
+    <div className="min-h-screen w-full flex-1 flex flex-col bg-obsidian-950 text-sand-100 max-w-full overflow-x-hidden font-sans">
       {/* Global Header */}
-      <Header
-        currentScreen={currentScreen}
-        onReset={handleReset}
-        onOpenReport={() => setIsReportModalOpen(true)}
-        unreadAlertCount={unreadAlertCount}
-        onToggleAlerts={() => setIsAlertsOpen(true)}
-        caseData={currentCase}
-        onDirectDashboard={handleDirectDashboard}
-      />
+      {currentScreen !== 'landing' && (
+        <Header
+          currentScreen={currentScreen}
+          onReset={handleReset}
+          onOpenReport={() => setIsReportModalOpen(true)}
+          unreadAlertCount={unreadAlertCount}
+          onToggleAlerts={() => setIsAlertsOpen(true)}
+          caseData={currentCase}
+          onDirectDashboard={handleDirectDashboard}
+        />
+      )}
 
       {/* Screen 1: Landing Start Screen */}
       {currentScreen === 'landing' && (

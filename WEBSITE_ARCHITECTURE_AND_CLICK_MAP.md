@@ -1,6 +1,8 @@
 # MONOMER // Comprehensive Website Architecture & AI Interaction Click-Map
 
-> **System Purpose**: Automated cryptocurrency fraud tracing, VASP (Virtual Asset Service Provider) attribution, and Section 65B Indian Evidence Act court-admissible forensic reporting for Law Enforcement Agencies (LEAs).
+> **System Purpose**: Automated cryptocurrency fraud tracing, VASP (Virtual Asset Service Provider) attribution, and Section 65B Indian Evidence Act court-admissible forensic reporting for Law Enforcement Agencies (LEAs).  
+> **Live Production Deployment**: [https://monomer-investigation.vercel.app](https://monomer-investigation.vercel.app)  
+> **Direct Deployment URL**: [https://monomer-investigation-8zv58wq23-de-v8s-projects.vercel.app](https://monomer-investigation-8zv58wq23-de-v8s-projects.vercel.app)  
 > **Target Audience / AI Agents**: This document provides an exhaustive, machine-readable breakdown of every page, view, component, button, click action, state transition, and backend API across the MONOMER platform.
 
 ---
@@ -208,19 +210,41 @@ Files:
 
 | Control Button | Icon / Name | Functionality |
 | :--- | :--- | :--- |
-| **Layout Toggle** | `[ Horizontal / Vertical ]` | Switches graph coordinates between **Left-to-Right timeline** flow and **Top-to-Bottom tree** hierarchy. |
-| **Chain Filter** | `[ All / Ethereum / Polygon ]` | Dims nodes/edges that do not belong to the selected chain. |
-| **Zones Toggle** | `[ Zones ]` | Toggles the background Ethereum L1 & Polygon L2 boundary containers. |
-| **Motion Toggle** | `[ Motion (Play/Pause) ]` | Pauses or resumes the animated dashed flow moving along transaction edges. |
+| **Layout Toggle** | `[ FLOW / ORBITAL ]` | Switches between horizontal directional flow and concentric orbital topology. |
+| **Chain Filter** | `[ ALL / ETH / POL ]` | Dims nodes/edges that do not belong to the selected blockchain network. |
+| **Replay Flow** | `[ ⟲ Replay Flow ]` | Restarts the chronological money laundering reconstruction sequence from Hop 1. |
 | **Splits Toggle** | `[ Splits (%) ]` | Toggles fund percentage badges on edges (`100%`, `40%`, `35%`, `25%`, `99.7%`). |
 | **Amounts Toggle** | `[ Amounts ]` | Toggles transaction dollar labels (`$2,000 USDT`, `$800 USDT`, etc.). |
-| **`[ Trace Exit Path ]` Button** | `Zap Icon` | Toggles isolation of the primary laundering cash-out route (`victim -> suspect -> walletC -> bridge -> polygonWallet -> exchange`), dimming all unrelated nodes to 20% opacity. |
+| **`[ Exit Path ]` Button** | `Zap Icon` | Toggles isolation of the primary laundering cash-out route (`victim -> suspect -> walletC -> bridge -> polygonWallet -> exchange`), dimming all unrelated nodes to 20% opacity. |
 | **`🎯 Focus Entity...` Dropdown** | Dropdown Select | Centering camera pan directly onto the chosen wallet node with smooth zoom. |
-| **`[ Clear Isolation ]` Button** | `X Icon` (Appears when AI flow active) | Clears AI-highlighted flow and returns full graph visibility. |
 | **`[ Auto Fit View ]`** | `Maximize2 Icon` | Re-centers and fits entire graph into the visible canvas area. |
 | **`[ MiniMap ]` Toggle** | `Map Icon` | Shows/hides thumbnail navigation map in bottom-right corner. |
 | **`[ Reset Graph ]`** | `RotateCcw Icon` | Resets all active filters, selections, and camera positions. |
-| **`[ Help / Legend ]`** | `HelpCircle Icon` | Toggles collapsible forensic graph legend explaining node colors and edge types. |
+
+#### D. Progressive Chronological Reconstruction HUD Player Bar (Bottom Floating Dock):
+
+| HUD Element | Trigger | Exact Behavior |
+| :--- | :--- | :--- |
+| **`[ Play / Pause ]`** | `onClick={togglePlayback}` | Toggles automated step advancement across all 6 hops. |
+| **`[ ⟲ Replay ]`** | `onClick={handleReplay}` | Resets step counter to 0 and begins sequential auto-play from Hop 1. |
+| **`[ HOP 1 ]` to `[ HOP 6 ]` Scrubber** | `onClick={() => setReconstructionStep(idx)}` | Jumps directly to that hop phase; smoothly animates camera framing to the newly revealed entities. |
+| **Telemetry Banner** | Display | Displays the active phase name (e.g. `CEX OFF-RAMP`), timestamp, and intelligence summary. |
+| **`[ 1x / 2x / 4x ]` Speed Pill** | `onClick={cyclePlaybackSpeed}` | Cycles through animation delays (`950ms`, `475ms`, `238ms`). |
+| **`[ SHOW ALL ]` Toggle** | `onClick={toggleShowAll}` | Disables sequential mode to reveal all 9 entities, 8 edges, and 2 network zones simultaneously. |
+
+#### E. Forensic Node Anatomy & Click Actions (`ForensicNode`):
+
+| Node Component | Interaction | Behavior |
+| :--- | :--- | :--- |
+| **Card Perimeter / Bezel** | `onClick={onSelect}` | Selects node, opens `WalletIntelligencePanel`, and highlights connected subgraphs. |
+| **Header Icon & Title** | Display | Displays entity icon, label (`Wallet D`), and role (`Parking Wallet`). |
+| **Category Pill** | Display | High-contrast status pill (`TARGET [HUB]`, `VICTIM`, `BRIDGE`, `CEX / KYC`, `RELAY`). |
+| **Hardware Port Terminals** | Connection Anchor | Left `IN` and right `OUT` luminous circular socket pins without duplicate dots. Connected edges dock directly into terminal centers. |
+| **Address Copy Button** | `onClick={handleCopy}` | Copies complete hexadecimal address to clipboard; flashes checkmark confirmation. |
+| **Balance Row** | Display | High-contrast bold amount with currency token separated in monospace (`$500.00 USDT`). |
+| **Threat Score Meter** | Display | Score numerical indicator (`52/100 • ELEVATED`) with grayscale gradient progress bar. |
+| **Forensic Tags** | Display | Micro-capsules (`Intermediary D`, `Parking Wallet`, `+1`). |
+| **`[ Inspect → ]` Button** | `onClick={onInspect}` | Opens the right-side `WalletIntelligencePanel` for deep on-chain telemetry. |
 
 ---
 

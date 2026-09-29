@@ -1,6 +1,7 @@
 # MONOMER: Real-Time Cryptocurrency Fraud Attribution & VASP Identification Platform
 
 [![Smart India Hackathon 2026](https://img.shields.io/badge/SIH-2026-blue?style=for-the-badge&logo=target)](https://sih.gov.in)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Production-black?style=for-the-badge&logo=vercel)](https://monomer-investigation.vercel.app)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![React Flow](https://img.shields.io/badge/Graph-React%20Flow%2012-purple?style=for-the-badge)](https://reactflow.dev/)
@@ -8,6 +9,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 > **Autonomous Blockchain Intelligence, Multi-Hop Laundering Pattern Recognition, Nearest VASP Off-Ramp Attribution, and Court-Admissible Forensic Evidence Generation for Law Enforcement Agencies (LEAs).**
+
+🌐 **Live Production Deployment**: [https://monomer-investigation.vercel.app](https://monomer-investigation.vercel.app)  
+🚀 **Direct Deployment URL**: [https://monomer-investigation-8zv58wq23-de-v8s-projects.vercel.app](https://monomer-investigation-8zv58wq23-de-v8s-projects.vercel.app)
 
 ---
 
@@ -22,6 +26,11 @@
   - [3. Exchange Clustering & VASP Attribution](#3-exchange-clustering--vasp-attribution)
   - [4. Mixers & Privacy Protocol De-Anonymization](#4-mixers--privacy-protocol-de-anonymization)
   - [5. Interactive Forensic Transaction Graph](#5-interactive-forensic-transaction-graph)
+    - [Achromatic Monochrome Digital Forensics Palette](#achromatic-monochrome-digital-forensics-palette)
+    - [Nodal Architecture & Hardware Connection Bus](#nodal-architecture--hardware-connection-bus)
+    - [Progressive Chronological Reconstruction Player](#progressive-chronological-reconstruction-player)
+    - [Dual Perimeter Network Zones](#dual-perimeter-network-zones)
+    - [Fluid Responsive Cross-Device Viewport](#fluid-responsive-cross-device-viewport)
   - [6. AI/ML-Assisted Investigation Agent](#6-aiml-assisted-investigation-agent)
   - [7. Real-Time LEA Alert Center](#7-real-time-lea-alert-center)
   - [8. Court-Admissible Forensic Dossier & Reports](#8-court-admissible-forensic-dossier--reports)
@@ -167,9 +176,60 @@ sequenceDiagram
   * *Relayer Footprint Unmasking*: Correlates gas sponsors of withdrawal relayers to identify common operational nodes.
 
 ### 5. Interactive Forensic Transaction Graph
-* **Interactive Canvas**: Built with `@xyflow/react` featuring custom forensic SVG nodes (Victim, Primary Suspect, Layering Intermediary, Bridge Contract, Polygon Destination, and Centralized Exchange).
-* **Forensic Flow Edges**: Color-coded directional edges displaying transferred values, assets, block numbers, transaction hashes, and pattern tags.
-* **Investigative Tooling**: Time scrubber (stepping through transactions chronologically), layout switcher, chain filters, and camera focus controls.
+
+The core visualization engine is built on **`@xyflow/react` v12** and customized into a specialized intelligence workstation modeled after high-end hardware signal processors and cyber-forensic node graphs.
+
+#### Achromatic Monochrome Digital Forensics Palette
+* **Strict Achromatic Design (`NO HUE`)**: Uses pure contrast, line weight, scale, and luminosity rather than rainbow colors:
+  * Pure Obsidian Backgrounds (`#050505`, `#0E0E11`, `#141417`).
+  * Contrast Hierarchy: Sand-100 White (`#F5F5F5`), Silver (`#CCCCCC`), Muted Zinc (`#888888`), Deep Slate (`#202020`).
+  * Optical Halo & Marching Ants: White glow shaders and high-contrast dashed circuit traces replace neon accents.
+
+#### Nodal Architecture & Hardware Connection Bus
+* **Precision Terminal Pins (`ForensicNode`)**:
+  * **Single Luminous Sockets**: Connection ports on the card perimeter are styled as high-contrast circular pins (`bg-sand-100` white core with an obsidian border and outer glow).
+  * **Zero Double-Dot Artifacts**: Connection handles directly terminate the edges without duplicate inner dots.
+  * **Connection Bus Bar**: Integrated `IN` / `OUT` ports bridged by a subtle hairline circuit telemetry track (`• — •`).
+* **Unified Key Attributes Panel**:
+  * Consolidates `Address` and `Balance` into a single glassmorphic module with a hairline divider.
+  * `Address`: Interactive copy button with instant copy-confirmation feedback.
+  * `Balance`: High-contrast numeric display with currency token formatted in subtle monospace.
+* **Telemetry Threat Assessment**:
+  * Numerical score: `52/100 • ELEVATED`.
+  * Grayscale gradient progress bar (`from-sand-400 via-sand-200 to-sand-100`) with luminous glow dynamics.
+* **Entity Classification Hierarchy**:
+  * **Target Hub (`suspect`)**: High-contrast inverted badge (`TARGET [HUB]`) with white outer halo.
+  * **Victim (`victim`)**: Silver solid border with `VICTIM` tag.
+  * **Cross-Chain Gateway (`bridge`)**: Dashed border with `BRIDGE` protocol indicator.
+  * **Exchange Terminal (`exchange`)**: Solid silver border with `CEX / KYC` compliance tag.
+  * **Layering Relays (`walletB`, `walletC`, `walletD`)**: Low-noise obsidian borders with `RELAY` tags.
+
+#### Progressive Chronological Reconstruction Player
+* **Cinema-Grade Reconstruction Flow**:
+  * Animates the money laundering trail hop-by-hop across 6 distinct chronological phases:
+    1. *Victim Inflow*: Defrauded capital enters the suspect hub ($2,000 USDT).
+    2. *Rapid Dispersal Layer*: High-velocity splitting into intermediary wallets B, C, and D.
+    3. *Downstream Transit & Parking*: Parking wallet isolation and secondary hop forward.
+    4. *Cross-Chain Bridge Gateway*: Lock and burn event on Ethereum L1 bridge smart contract.
+    5. *Polygon L2 Transit*: Cross-chain release and transit hop on Polygon POS.
+    6. *Exchange Off-Ramp Endpoint*: Deposit consolidation into regulated CEX hotwallet.
+* **Bottom Floating HUD Player**:
+  * **Playback Controls**: Play / Pause, Replay sequence from Hop 1.
+  * **Step Scrubber**: Interactive step pills (1 to 6) allowing officers to jump directly to any transaction phase.
+  * **Speed Multiplier**: Toggle between `1x`, `2x`, and `4x` playback cadences.
+  * **Show All Mode**: Instantly manifests all nodes, edges, and zones simultaneously.
+* **Automated Smooth Camera Guidance**:
+  * Dynamically centers and zooms the viewport to keep the active laundering frontier in focus with easing transitions (`750ms`).
+
+#### Dual Perimeter Network Zones
+* **Group Bounding Boxes (`NetworkZoneNode`)**:
+  * **Ethereum Mainnet (L1) Zone**: 1760x1060px perimeter enclosing the primary 7 entities ($2,000 USDT inflow and layering cluster).
+  * **Polygon POS (L2) Zone**: 830x440px perimeter framing the cross-chain transit wallet and off-ramp terminal.
+  * Features technical perimeter coordinates, chain indicators, and corner cyber-brackets.
+
+#### Fluid Responsive Cross-Device Viewport
+* Fully responsive across **ultrawide 4K monitors (3840x2160)**, **desktop workstations (1920x1080)**, **laptops (1440x900, 1280x720)**, and **mobile/tablets**.
+* Replaced rigid height constraints with adaptive scrolling containers and responsive Three.js wireframe globe mesh scaling.
 
 ### 6. AI/ML-Assisted Investigation Agent
 * **Autonomous Reasoning**: Powered by Groq Llama-3 with function calling / tool use.

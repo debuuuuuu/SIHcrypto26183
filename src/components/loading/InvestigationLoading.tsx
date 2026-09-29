@@ -67,7 +67,7 @@ export const InvestigationLoading: React.FC<InvestigationLoadingProps> = ({
 
   return (
     <div className="min-h-[calc(100vh-52px)] bg-obsidian-950 bg-obsidian-dot-grid flex flex-col items-center justify-center px-4 py-8 select-none">
-      <div className="max-w-lg w-full bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-6 space-y-5 text-left">
+      <div className="max-w-lg w-full bg-obsidian-900 border border-obsidian-750 rounded-[6px] p-6 space-y-5 text-left animate-fade-in-up">
         {/* Header (Section 18) */}
         <div className="flex items-center justify-between border-b border-obsidian-750 pb-3">
           <div>
@@ -100,11 +100,11 @@ export const InvestigationLoading: React.FC<InvestigationLoadingProps> = ({
             {INVESTIGATION_STEPS.map((_, i) => (
               <div
                 key={i}
-                className={`h-full rounded-[2px] transition-colors duration-200 ${
+                className={`h-full rounded-[2px] transition-all duration-300 ${
                   i < currentStep
-                    ? 'bg-sand-100'
+                    ? 'bg-sand-100 shadow-[0_0_8px_rgba(245,245,245,0.4)]'
                     : i === currentStep
-                    ? 'bg-sand-300'
+                    ? 'bg-sand-400 animate-pulse'
                     : 'bg-obsidian-750'
                 }`}
               />
@@ -122,16 +122,16 @@ export const InvestigationLoading: React.FC<InvestigationLoadingProps> = ({
             return (
               <div
                 key={index}
-                className={`flex items-center justify-between px-2.5 py-1.5 rounded-[4px] transition-colors text-[11px] ${
+                className={`flex items-center justify-between px-2.5 py-1.5 rounded-[4px] transition-all duration-300 ease-out text-[11px] border-l-2 ${
                   isCurrent
-                    ? 'bg-obsidian-850 text-sand-100 font-semibold border-l-2 border-sand-300'
+                    ? 'bg-obsidian-850 text-sand-100 font-semibold border-sand-300 translate-x-1 shadow-[0_4px_15px_rgba(0,0,0,0.4)]'
                     : isCompleted
-                    ? 'text-zinc-400'
-                    : 'text-zinc-600'
+                    ? 'text-zinc-400 border-transparent'
+                    : 'text-zinc-600 border-transparent'
                 }`}
               >
                 <div className="flex items-center space-x-2 truncate">
-                  <span className="text-zinc-600">{numStr}</span>
+                  <span className={`transition-colors duration-300 ${isCurrent ? 'text-sand-300' : 'text-zinc-600'}`}>{numStr}</span>
                   <span className="truncate">{stepName}</span>
                 </div>
 
@@ -139,7 +139,7 @@ export const InvestigationLoading: React.FC<InvestigationLoadingProps> = ({
                   {isCompleted ? (
                     <span className="text-sand-100 font-bold">✓</span>
                   ) : isCurrent ? (
-                    <span className="text-sand-300 font-bold">●</span>
+                    <span className="text-sand-300 font-bold animate-pulse">●</span>
                   ) : (
                     <span className="text-zinc-600">○</span>
                   )}
